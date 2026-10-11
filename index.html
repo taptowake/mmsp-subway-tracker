@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MMSP Telemetry - Metro Manila Subway Survey Alignment & Active TBMs</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            subway: {
+              completed: '#10b981',
+              active: '#f59e0b',
+              civil: '#0284c7',
+              staged: '#a855f7',
+              darkbg: '#050811',
+              surface: '#0d1527',
+              card: '#111c35',
+              border: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #050811;
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Cutterhead rotation animation */
+    @keyframes spin-cutter {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .cutter-spin {
+      animation: spin-cutter 3s linear infinite;
+    }
+
+    /* Radar Ping for Active TBMs */
+    @keyframes tbm-radar-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.9); }
+      70% { box-shadow: 0 0 0 24px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    .tbm-radar {
+      animation: tbm-radar-pulse 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+    }
+
+    /* Tile Canvas container styling */
+    .leaflet-container {
+      background: #11141a !important;
+      font-family: 'Inter', sans-serif !important;
+    }
+
+    /* Popups */
+    .leaflet-popup-content-wrapper {
+      background: #0d1527 !important;
+      color: #f8fafc !important;
+      border: 1px solid #334155 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.85) !important;
+      padding: 4px !important;
+    }
+    .leaflet-popup-tip {
+      background: #0d1527 !important;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050811;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden">
+
+  <!-- TOP TELEMETRY BAR -->
+  <header class="h-16 shrink-0 bg-slate-900 border-b border-slate-800 px-4 md:px-6 flex items-center justify-between z-30 shadow-md">
+    <div class="flex items-center gap-3">
+      <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
+        <i data-lucide="map" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">DOTr • JICA ODA MMSP</span>
+          <span class="text-[10px] md:text-[11px] font-mono text-emerald-400 flex items-center gap-1 font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> GIS ONLINE (ESRI ENGINE)
+          </span>
+          <span class="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-600 text-emerald-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> CP102 Breakthrough Verified
+          </span>
+        </div>
+        <h1 class="text-sm md:text-base font-extrabold text-white tracking-tight flex items-center gap-2">
+          Metro Manila Subway
+          <span class="text-xs font-medium text-slate-400 hidden lg:inline font-sans">| DED Survey Alignment & Active TBM Positions</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- KPIs & Basemap Switcher -->
+    <div class="flex items-center gap-2 md:gap-3 font-mono">
+      <div class="hidden xl:flex px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 items-center gap-2">
+        <div class="text-[10px] text-slate-400 uppercase tracking-wider">Total Extent</div>
+        <div class="text-sm font-bold text-white">33.1 <span class="text-[10px] font-normal text-slate-400">km</span></div>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">17 Stns</span>
+      </div>
+
+      <div class="hidden md:flex px-3 py-1.5 rounded-xl bg-slate-950 border border-emerald-900/60 items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+        <div class="text-[10px] text-emerald-400 uppercase tracking-wider">Holed Out</div>
+        <div class="text-sm font-bold text-emerald-300">~8.4 <span class="text-[10px] font-normal text-slate-400">km</span></div>
+      </div>
+
+      <div class="flex px-2.5 md:px-3 py-1.5 rounded-xl bg-slate-950 border border-amber-900/70 items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></div>
+        <div class="text-[10px] text-amber-400 uppercase tracking-wider hidden sm:block">Active TBMs</div>
+        <div class="text-xs md:text-sm font-bold text-amber-300">2 <span class="text-[10px] font-normal text-slate-400">Shields</span></div>
+        <span class="text-[9px] px-1 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-700">CP103</span>
+      </div>
+
+      <!-- Basemap Toggle Button -->
+      <button onclick="cycleBasemap()" id="bm-toggle-btn" class="px-2.5 md:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-mono font-semibold flex items-center gap-1.5 transition">
+        <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+        <span id="bm-mode-text">Dark Canvas</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-80 shrink-0 bg-slate-900/95 border-r border-slate-800 flex flex-col z-20 overflow-hidden hidden md:flex">
+      
+      <!-- Spatial Focus Jumps -->
+      <div class="p-3 border-b border-slate-800 bg-slate-950/70">
+        <div class="text-[10px] font-mono font-bold text-slate-400 mb-2 flex items-center justify-between">
+          <span>SPATIAL FOCUS JUMPS</span>
+          <span class="text-cyan-400">QUICK ZOOM</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5 text-xs font-mono">
+          <button onclick="mapFocus('activeTBMs')" class="col-span-2 py-1.5 px-2 rounded-lg bg-amber-950/80 border border-amber-600 text-amber-300 font-bold flex items-center justify-center gap-1.5 hover:bg-amber-900 transition">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Focus: 2 Active TBMs
+          </button>
+          <button onclick="mapFocus('mindanao')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            Mindanao Median
+          </button>
+          <button onclick="mapFocus('vmmc')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            VMMC / North Ave
+          </button>
+          <button onclick="mapFocus('quezonave')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            Centris Q.Ave (CP102)
+          </button>
+          <button onclick="mapFocus('whiteplains')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            White Plains Drive
+          </button>
+          <button onclick="mapFocus('bgc')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            11th Ave BGC (CP105)
+          </button>
+          <button onclick="mapFocus('naiaBranch')" class="py-1.5 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] text-left truncate transition">
+            NAIA T3 Spur (CP109)
+          </button>
+          <button onclick="mapFocus('full')" class="col-span-2 py-1.5 px-2 rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-300 text-[11px] text-center font-bold truncate hover:bg-cyan-900 transition">
+            Full Subway Trace (33.1 km)
+          </button>
+        </div>
+      </div>
+
+      <!-- Layer Visibility Toggles -->
+      <div class="p-3 border-b border-slate-800 bg-slate-900 text-xs">
+        <div class="text-[10px] font-mono font-bold text-slate-400 mb-2 flex items-center justify-between">
+          <span>LAYER VISIBILITY TOGGLES</span>
+        </div>
+        <div class="space-y-1.5 text-xs font-mono">
+          <label class="flex items-center justify-between p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 cursor-pointer hover:border-slate-700">
+            <span class="flex items-center gap-2 text-slate-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Holed / Completed
+            </span>
+            <input type="checkbox" id="layer-completed" checked onchange="updateFilters()" class="accent-emerald-500 rounded">
+          </label>
+          <label class="flex items-center justify-between p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 cursor-pointer hover:border-slate-700">
+            <span class="flex items-center gap-2 text-slate-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span> Active TBM Shields
+            </span>
+            <input type="checkbox" id="layer-active" checked onchange="updateFilters()" class="accent-amber-500 rounded">
+          </label>
+          <label class="flex items-center justify-between p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 cursor-pointer hover:border-slate-700">
+            <span class="flex items-center gap-2 text-slate-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> Station Box Cuts (No TBM)
+            </span>
+            <input type="checkbox" id="layer-civil" checked onchange="updateFilters()" class="accent-sky-500 rounded">
+          </label>
+          <label class="flex items-center justify-between p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 cursor-pointer hover:border-slate-700">
+            <span class="flex items-center gap-2 text-slate-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Staged / Utility Prep
+            </span>
+            <input type="checkbox" id="layer-staged" checked onchange="updateFilters()" class="accent-purple-500 rounded">
+          </label>
+          <label class="flex items-center justify-between p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 cursor-pointer hover:border-slate-700">
+            <span class="flex items-center gap-2 text-slate-300">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-cyan-400"></i> Station Nodes (17)
+            </span>
+            <input type="checkbox" id="layer-stations" checked onchange="updateFilters()" class="accent-cyan-500 rounded">
+          </label>
+        </div>
+      </div>
+
+      <!-- Segment Progression List -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-2">
+        <div class="text-[10px] font-mono font-bold text-slate-400 mb-1 flex items-center justify-between sticky top-0 bg-slate-900 py-1 z-10">
+          <span>NORTH-TO-SOUTH ALIGNMENT CHAIN</span>
+          <span class="text-slate-500">DED TRACE</span>
+        </div>
+        <div id="segment-list-container" class="space-y-1.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER MAP CONTAINER -->
+    <main class="flex-1 relative flex flex-col bg-slate-950 overflow-hidden">
+      
+      <!-- Floating Map Legend Pill Top-Right -->
+      <div class="absolute top-4 right-4 z-20 bg-slate-900/90 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-800 shadow-2xl flex items-center gap-3 text-xs font-mono pointer-events-auto">
+        <div class="flex items-center gap-1.5 text-emerald-400">
+          <span class="w-3 h-1.5 bg-emerald-400 rounded"></span> Holed
+        </div>
+        <div class="flex items-center gap-1.5 text-amber-400">
+          <span class="w-3 h-1.5 bg-amber-400 rounded animate-pulse"></span> Active TBM
+        </div>
+        <div class="flex items-center gap-1.5 text-sky-400 hidden sm:flex">
+          <span class="w-3 h-1.5 bg-sky-400 rounded"></span> Station Cut
+        </div>
+        <div class="flex items-center gap-1.5 text-purple-400 hidden sm:flex">
+          <span class="w-3 h-1.5 border-t-2 border-dashed border-purple-400"></span> Staged
+        </div>
+      </div>
+
+      <!-- Leaflet Map Canvas -->
+      <div id="gis-map" class="w-full h-full z-10"></div>
+
+      <!-- Floating Bottom Active TBM Telemetry HUD -->
+      <div class="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-20 pointer-events-none">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto pointer-events-auto">
+          
+          <!-- TBM #1 Card (Camp Aguinaldo to Ortigas) -->
+          <div onclick="mapFocus('tbm1')" class="p-3 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-amber-500/60 shadow-2xl hover:border-amber-400 cursor-pointer transition">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-950 border border-amber-600 flex items-center justify-center text-amber-400 shrink-0">
+                  <i data-lucide="disc" class="w-4 h-4 cutter-spin"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-mono font-bold text-amber-400">TBM #1 (SOUTH SHAFT)</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-700">CP103 ➔ CP104</span>
+                  </div>
+                  <h4 class="text-xs font-bold text-white mt-0.5">Camp Aguinaldo ➔ Ortigas Headwall Box</h4>
+                </div>
+              </div>
+              <div class="text-right font-mono">
+                <div class="text-xs font-bold text-amber-400">~64.1%</div>
+                <div class="text-[9px] text-slate-400">1,840m / 2,871m</div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-300 mt-1.5 font-sans line-clamp-1">
+              Active subterranean drive beneath White Plains & Greenmeadows toward Meralco Ave retrieval box.
+            </p>
+            <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden mt-2 border border-slate-800">
+              <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-500" style="width: 64.1%"></div>
+            </div>
+          </div>
+
+          <!-- TBM #2 Card (Camp Aguinaldo to Anonas) -->
+          <div onclick="mapFocus('tbm2')" class="p-3 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-amber-500/60 shadow-2xl hover:border-amber-400 cursor-pointer transition">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-amber-950 border border-amber-600 flex items-center justify-center text-amber-400 shrink-0">
+                  <i data-lucide="disc" class="w-4 h-4 cutter-spin"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-mono font-bold text-amber-400">TBM #2 (NORTH SHAFT)</span>
+                    <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-700">CP103</span>
+                  </div>
+                  <h4 class="text-xs font-bold text-white mt-0.5">Camp Aguinaldo ➔ Anonas Station</h4>
+                </div>
+              </div>
+              <div class="text-right font-mono">
+                <div class="text-xs font-bold text-amber-400">~83.9%</div>
+                <div class="text-[9px] text-slate-400">1,155m / 1,377m</div>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-300 mt-1.5 font-sans line-clamp-1">
+              Boring along Katipunan Ave corridor toward LRT-2 Anonas interchange box.
+            </p>
+            <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden mt-2 border border-slate-800">
+              <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-500" style="width: 83.9%"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR: Engineering Inspector -->
+    <aside class="w-96 shrink-0 bg-slate-900 border-l border-slate-800 flex flex-col z-20 hidden lg:flex">
+      
+      <!-- Inspector Header -->
+      <div class="p-4 border-b border-slate-800 bg-slate-950/70 flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider block">ENGINEERING INSPECTOR</span>
+          <h3 id="insp-title" class="text-sm font-bold text-white mt-0.5">Select Segment or Station</h3>
+        </div>
+        <span id="insp-cp-tag" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">OVERVIEW</span>
+      </div>
+
+      <!-- Inspector Body Content -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
+        
+        <!-- Status Banner -->
+        <div>
+          <span class="text-[11px] font-mono text-slate-400 block mb-1">TUNNELING & CIVIL STATUS:</span>
+          <div id="insp-status-badge" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-slate-200 font-bold flex items-center gap-2">
+            Click on any segment along the alignment or station node on the map to inspect engineering parameters.
+          </div>
+        </div>
+
+        <!-- Description & Corridor Alignment Notes -->
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+          <div class="text-[11px] font-mono text-cyan-400 font-semibold flex items-center gap-1.5">
+            <i data-lucide="route" class="w-4 h-4"></i> Detailed Engineering Trajectory (DED)
+          </div>
+          <p id="insp-desc" class="text-slate-300 leading-relaxed font-sans">
+            The Metro Manila Subway alignment follows surveyed rights-of-way and subsurface easements: Mindanao Avenue Extension (Ugong Depot), Quirino Highway, Mindanao Avenue median, VMMC Golf Course curve, Vertis North into Centris, Heroes St/BIR Rd/East Ave, Katipunan Avenue, White Plains subterranean curve, Meralco Avenue, Pasig River crossing, Bonifacio Global City 11th Avenue, Lawton Avenue, and bifurcates into the NAIA T3 spur and NSCR Bicutan mainline.
+          </p>
+        </div>
+
+        <!-- Engineering Metrics Grid -->
+        <div class="grid grid-cols-2 gap-2.5 font-mono">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase block">Distance / Depth</span>
+            <span id="insp-dist" class="text-sm font-bold text-white mt-1 block">33.1 km Total</span>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase block">Geological Stratum</span>
+            <span id="insp-geology" class="text-sm font-bold text-cyan-300 mt-1 block">Guadalupe Tuff</span>
+          </div>
+        </div>
+
+        <!-- Contractor & Consortia Info -->
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+          <span class="text-[10px] font-mono text-slate-500 uppercase block">Contractor Consortium</span>
+          <div id="insp-contractor" class="text-xs font-bold text-slate-200 font-mono">
+            Joint Venturers across CP101 to CP109
+          </div>
+          <div id="insp-tbms" class="text-[11px] text-amber-400 font-mono pt-1">
+            Allocated Shields: 25 TBMs line-wide total
+          </div>
+        </div>
+
+        <!-- Breakthrough Milestone Notes -->
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+          <span class="text-[10px] font-mono text-slate-500 uppercase block">Recent Milestone / Verification</span>
+          <p id="insp-milestone" class="text-[11px] text-slate-300 font-sans leading-relaxed">
+            CP102 achieved southbound breakthrough at Quezon Avenue on September 24, 2026. CP103 has two operational TBMs driving concurrently out of Camp Aguinaldo.
+          </p>
+        </div>
+
+        <!-- Geotechnical Formation Note -->
+        <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed font-sans">
+          <span class="font-bold text-slate-300 block mb-0.5">Geotechnical Context:</span>
+          Most tunneling drives pass through the volcanic bedrock of the <em>Guadalupe Formation</em> (tuff and tuffaceous sandstone), which provides stable ground conditions for Earth Pressure Balance (EPB) and Slurry TBMs.
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    /*
+     * SURVEY-ACCURATE COORDINATES FOR ALL 17 STATIONS
+     */
+    const stations = [
+      { id: "stn-1", name: "East Valenzuela (Depot)", lat: 14.7008, lng: 121.0162, cp: "CP101", contractor: "Shimizu-Fujita-Takenaka-EEI JV", status: "complete", depth: "Depot / Surface Portal", interchange: "Mindanao Ave Ext / Valenzuela OCC", desc: "Depot and passenger station in Brgy. Ugong along Mindanao Avenue Extension with rolling stock maintenance yard." },
+      { id: "stn-2", name: "Quirino Highway", lat: 14.6894, lng: 121.0283, cp: "CP101", contractor: "Shimizu-Fujita-Takenaka-EEI JV", status: "complete", depth: "22m (3-level underground)", interchange: "Mindanao Ave / Quirino Hwy", desc: "Underground station box located along the median of Mindanao Avenue corner Quirino Highway." },
+      { id: "stn-3", name: "Tandang Sora", lat: 14.6675, lng: 121.0335, cp: "CP101", contractor: "Shimizu-Fujita-Takenaka-EEI JV", status: "complete", depth: "26m (3-level underground)", interchange: "Mindanao Ave / Tandang Sora Ave", desc: "Station situated directly beneath the center median of Mindanao Avenue at the Tandang Sora intersection." },
+      { id: "stn-4", name: "North Avenue", lat: 14.6533, lng: 121.0325, cp: "CP101/102", contractor: "Nishimatsu-DMCI JV / Shimizu JV", status: "complete", depth: "28m (4-level underground)", interchange: "LRT-1 / MRT-3 / MRT-7 UGCS", desc: "Positioned along North Avenue and the VMMC Golf Course edge, connecting directly to the Unified Grand Central Station (UGCS / TriNoma / SM North)." },
+      { id: "stn-5", name: "Quezon Avenue", lat: 14.6445, lng: 121.0385, cp: "CP102", contractor: "Nishimatsu-DMCI JV", status: "complete", depth: "27m (3-level underground)", interchange: "MRT-3 Quezon Ave / Centris Walk", desc: "Situated inside the Eton Centris station box between EDSA and Heroes Street. First CP102 breakthrough celebrated here on Sept 24, 2026." },
+      { id: "stn-6", name: "East Avenue", lat: 14.6398, lng: 121.0485, cp: "CP102", contractor: "Nishimatsu-DMCI JV", status: "civil", depth: "24m (3-level underground)", interchange: "Philippine Heart Center / SSS / LTO", desc: "Station located along East Avenue near Quezon City Hall and medical centers. Open station box excavation ongoing; no TBM launched." },
+      { id: "stn-7", name: "Anonas", lat: 14.6278, lng: 121.0648, cp: "CP103", contractor: "Sumitomo Mitsui (SMCC)", status: "active", depth: "26m (3-level underground)", interchange: "LRT-2 Anonas Station", desc: "Deep interchange hub beneath Aurora Blvd and Anonas Street. Currently awaiting arrival of TBM #2 from Camp Aguinaldo." },
+      { id: "stn-8", name: "Camp Aguinaldo", lat: 14.6075, lng: 121.0673, cp: "CP103", contractor: "Sumitomo Mitsui (SMCC)", status: "active", depth: "22m (3-level underground)", interchange: "Katipunan Ave / C-5 / Boni Serrano", desc: "Primary central tunneling hub with active twin launch shafts driving north toward Anonas and south toward Ortigas." },
+      { id: "stn-9", name: "Ortigas", lat: 14.5874, lng: 121.0643, cp: "CP104", contractor: "Tokyu-Tobishima-Megawide JV", status: "civil", depth: "29m (3-level underground)", interchange: "Future MRT-4 / Ortigas CBD / Metrowalk", desc: "Located along Meralco Avenue in Pasig City. Deep excavated station box serves as the retrieval target for the southbound CP103 TBM." },
+      { id: "stn-10", name: "Shaw Boulevard", lat: 14.5772, lng: 121.0620, cp: "CP104", contractor: "Tokyu-Tobishima-Megawide JV", status: "civil", depth: "31m (4-level underground)", interchange: "Capitol Commons / Shaw Blvd", desc: "Station along Meralco Avenue corner Shaw Boulevard adjacent to Capitol Commons." },
+      { id: "stn-11", name: "Kalayaan Avenue", lat: 14.5574, lng: 121.0544, cp: "CP105", contractor: "EEI-Shimizu JV", status: "pending", depth: "25m (3-level underground)", interchange: "Uptown Mall / BGC-Ortigas Link", desc: "Located under 11th Avenue between 38th and 36th Streets beside Uptown Mall, North BGC." },
+      { id: "stn-12", name: "BGC (High Street)", lat: 14.5492, lng: 121.0543, cp: "CP105", contractor: "EEI-Shimizu JV", status: "pending", depth: "28m (3-level underground)", interchange: "Market! Market! / Serendra", desc: "Underground station box located along 11th Avenue and 26th Street directly between Serendra and Market! Market!." },
+      { id: "stn-13", name: "Lawton", lat: 14.5350, lng: 121.0340, cp: "CP108", contractor: "Consortium JV", status: "pending", depth: "24m (3-level underground)", interchange: "Lawton Ave / NAMRIA / McKinley West", desc: "Station located along Lawton Avenue near the NAMRIA headquarters and McKinley West." },
+      { id: "stn-14", name: "Senate-DepEd", lat: 14.5245, lng: 121.0286, cp: "CP108", contractor: "Consortium JV", status: "pending", depth: "22m (3-level underground)", interchange: "New Senate Building / Nichols NSCR", desc: "Located along Lawton Avenue near the New Senate Building and Navy Golf Club. Key bifurcation junction." },
+      { id: "stn-15", name: "NAIA Terminal 3", lat: 14.5204, lng: 121.0146, cp: "CP109", contractor: "Airport Package Consortium", status: "pending", depth: "23m (Direct Terminal Basement)", interchange: "NAIA T3 Domestic & Intl", desc: "Airport spur station entering directly under Andrews Avenue and the Terminal 3 passenger apron." },
+      { id: "stn-16", name: "FTI (Arca South)", lat: 14.5126, lng: 121.0468, cp: "CP108", contractor: "Consortium JV", status: "pending", depth: "18m (Intermodal Level)", interchange: "NSCR FTI Station / Taguig ITS", desc: "Major multimodal transit hub connecting with the North-South Commuter Railway (NSCR)." },
+      { id: "stn-17", name: "Bicutan", lat: 14.4892, lng: 121.0478, cp: "CP108", contractor: "Consortium JV", status: "pending", depth: "Surface / Subsurface Portal", interchange: "NSCR Bicutan Station / SLEX", desc: "Southern terminus of the mainline track with through-running rail interoperability into the NSCR mainline." }
+    ];
+
+    /*
+     * SURVEY-ACCURATE RIGHT-OF-WAY (ROW) SEGMENT WAYPOINTS
+     */
+    const segments = [
+      {
+        id: "seg-1",
+        name: "Valenzuela Depot ➔ Quirino Highway",
+        cp: "CP101",
+        status: "completed",
+        statusLabel: "100% Fully Dug Out (Twin Bores Complete)",
+        contractor: "Shimizu – Fujita – Takenaka – EEI JV",
+        color: "#10b981",
+        distance: "2.3 km",
+        geology: "Guadalupe Tuff",
+        milestone: "Dual breakthroughs achieved; cross-passages excavated and lined.",
+        desc: "Begins in Brgy. Ugong at the depot yard, passes East Valenzuela Station on Mindanao Ave Extension, sweeps beneath NLEX Karuhatan and enters the median of Mindanao Avenue heading to Quirino Highway Station.",
+        coords: [
+          [14.7042, 121.0118],
+          [14.7008, 121.0162],
+          [14.6960, 121.0220],
+          [14.6925, 121.0255],
+          [14.6894, 121.0283]
+        ]
+      },
+      {
+        id: "seg-2",
+        name: "Quirino Highway ➔ Tandang Sora",
+        cp: "CP101",
+        status: "completed",
+        statusLabel: "100% Fully Dug Out (Twin Bores Complete)",
+        contractor: "Shimizu – Fujita – Takenaka – EEI JV",
+        color: "#10b981",
+        distance: "2.5 km",
+        geology: "Guadalupe Formation (Tuff)",
+        milestone: "Breakthrough holed through; permanent precast concrete segmental rings placed.",
+        desc: "Runs directly along the center median of Mindanao Avenue (N128) heading straight south-southeast.",
+        coords: [
+          [14.6894, 121.0283],
+          [14.6815, 121.0305],
+          [14.6730, 121.0323],
+          [14.6675, 121.0335]
+        ]
+      },
+      {
+        id: "seg-3",
+        name: "Tandang Sora ➔ North Avenue",
+        cp: "CP101",
+        status: "completed",
+        statusLabel: "100% Fully Dug Out (Twin Bores Complete)",
+        contractor: "Shimizu – Fujita – Takenaka – EEI JV",
+        color: "#10b981",
+        distance: "1.7 km",
+        geology: "Dense Tuff & Sandstone",
+        milestone: "Boring completed; transition portal into CP102 verified.",
+        desc: "Continues straight south along the median of Mindanao Avenue past Congressional Ave. At the intersection of Mindanao Ave and North Ave (near SM North Annex), it curves into the VMMC Golf Course edge and terminates at North Avenue Station connecting to the Unified Grand Central Station (UGCS).",
+        coords: [
+          [14.6675, 121.0335],
+          [14.6610, 121.0315],
+          [14.6565, 121.0305],
+          [14.6540, 121.0312],
+          [14.6533, 121.0325]
+        ]
+      },
+      {
+        id: "seg-4",
+        name: "North Avenue ➔ Quezon Avenue",
+        cp: "CP102",
+        status: "completed",
+        statusLabel: "Southbound Bore 100% Holed (Breakthrough Sept 2026)",
+        contractor: "Nishimatsu Construction – DMCI JV",
+        color: "#10b981",
+        distance: "1.13 km",
+        geology: "Guadalupe Formation",
+        milestone: "First CP102 breakthrough celebrated on September 24, 2026 at Quezon Ave box.",
+        desc: "From North Avenue Station, curves smoothly through Vertis North toward EDSA and enters the Eton Centris station box between EDSA and Heroes Street.",
+        coords: [
+          [14.6533, 121.0325],
+          [14.6500, 121.0345],
+          [14.6465, 121.0372],
+          [14.6445, 121.0385]
+        ]
+      },
+      {
+        id: "seg-5",
+        name: "Quezon Avenue ➔ East Avenue",
+        cp: "CP102",
+        status: "civil",
+        statusLabel: "Deep Station Box Excavation (No TBM Boring)",
+        contractor: "Nishimatsu Construction – DMCI JV",
+        color: "#0284c7",
+        distance: "1.5 km",
+        geology: "Upper Weathered Tuff",
+        milestone: "East Ave deep diaphragm wall and civil station excavation in progress.",
+        desc: "NO TBM is turning here. TBM at Quezon Ave is undergoing maintenance. The alignment leaves Centris along Heroes Street / BIR Road, turns onto East Avenue near the Heart Center, SSS, and LTO.",
+        coords: [
+          [14.6445, 121.0385],
+          [14.6425, 121.0410],
+          [14.6408, 121.0450],
+          [14.6398, 121.0485]
+        ]
+      },
+      {
+        id: "seg-6",
+        name: "East Avenue ➔ Anonas",
+        cp: "CP102 / CP103 Interface",
+        status: "civil",
+        statusLabel: "Civil Preparation / Station Box Prep (No TBM Launched)",
+        contractor: "Nishimatsu / SMCC Consortium",
+        color: "#0284c7",
+        distance: "2.1 km",
+        geology: "Guadalupe Tuff",
+        milestone: "Interchange box diaphragm walls and piling ongoing at Anonas.",
+        desc: "Follows East Avenue past V. Luna Road, traverses deep subterranean easements under Sikatuna and Project 2-3 into the LRT-2 interchange box at Aurora Boulevard and Anonas.",
+        coords: [
+          [14.6398, 121.0485],
+          [14.6355, 121.0545],
+          [14.6315, 121.0605],
+          [14.6278, 121.0648]
+        ]
+      },
+      {
+        id: "seg-7",
+        name: "Camp Aguinaldo ➔ Anonas (Northbound Drive)",
+        cp: "CP103",
+        status: "active",
+        statusLabel: "ACTIVELY BORING (~83.9% Completed)",
+        contractor: "Sumitomo Mitsui Construction Co. (SMCC)",
+        color: "#f59e0b",
+        distance: "1,377 m",
+        geology: "Guadalupe Formation (Competent Tuff)",
+        milestone: "TBM #2 is ~220m away from Anonas station receiving wall along Katipunan.",
+        desc: "Launched northward from Camp Aguinaldo north shaft. Tunnels under Katipunan Avenue (C-5) northward across Boni Serrano and Aurora Boulevard toward Anonas Station.",
+        tbmActive: true,
+        tbmId: "TBM #2 (SMCC North)",
+        tbmCoords: [14.6225, 121.0665],
+        tbmProgress: "1,155m / 1,377m (83.9%)",
+        coords: [
+          [14.6075, 121.0673],
+          [14.6140, 121.0688],
+          [14.6200, 121.0695],
+          [14.6225, 121.0665],
+          [14.6278, 121.0648]
+        ]
+      },
+      {
+        id: "seg-8",
+        name: "Camp Aguinaldo ➔ Ortigas Headwall (Southbound Drive)",
+        cp: "CP103 (entering CP104 Box)",
+        status: "active",
+        statusLabel: "ACTIVELY BORING (~64.1% Completed)",
+        contractor: "Sumitomo Mitsui Construction Co. (SMCC)",
+        color: "#f59e0b",
+        distance: "2,871 m",
+        geology: "Guadalupe Tuff Subsurface",
+        milestone: "TBM #1 has passed 1.84 km deep beneath residential easements toward Meralco Ave.",
+        desc: "Launched southward from Camp Aguinaldo, passes deep underneath Katipunan Ave Ext, curves southwest into a deep subterranean easement beneath White Plains and Greenmeadows, emerging onto Meralco Avenue directly into Ortigas Station box for crane retrieval.",
+        tbmActive: true,
+        tbmId: "TBM #1 (SMCC South)",
+        tbmCoords: [14.5940, 121.0655],
+        tbmProgress: "1,840m / 2,871m (64.1%)",
+        coords: [
+          [14.6075, 121.0673],
+          [14.6015, 121.0680],
+          [14.5955, 121.0665],
+          [14.5940, 121.0655],
+          [14.5910, 121.0650],
+          [14.5874, 121.0643]
+        ]
+      },
+      {
+        id: "seg-9",
+        name: "Ortigas ➔ Shaw Boulevard",
+        cp: "CP104",
+        status: "civil",
+        statusLabel: "Meralco Avenue Deep Station Pit Excavation",
+        contractor: "Tokyu – Tobishima – Megawide JV",
+        color: "#0284c7",
+        distance: "1.2 km",
+        geology: "Guadalupe Tuff",
+        milestone: "Multi-level underground cut-and-cover excavation underway on Meralco Ave.",
+        desc: "Runs straight down Meralco Avenue in Pasig City from Ortigas Station (near Metrowalk) southward to Shaw Boulevard Station (near Capitol Commons). Both station boxes are actively being excavated; no TBM launched between them.",
+        coords: [
+          [14.5874, 121.0643],
+          [14.5820, 121.0632],
+          [14.5772, 121.0620]
+        ]
+      },
+      {
+        id: "seg-10",
+        name: "Shaw Boulevard ➔ Kalayaan Avenue",
+        cp: "CP105",
+        status: "staged",
+        statusLabel: "Pasig River Subsurface Tunnel Drive (Pre-Con)",
+        contractor: "EEI – Shimizu Joint Venture",
+        color: "#a855f7",
+        distance: "2.4 km",
+        geology: "Alluvial deposits over Tuff",
+        milestone: "Subsurface utility surveys and Pasig River crossing geotechnical probes.",
+        desc: "Continues south along Meralco Avenue, dives deep beneath the Pasig River (near Sta. Monica-Lawton Bridge), and aligns onto 11th Avenue at Kalayaan Avenue Station in Uptown BGC.",
+        coords: [
+          [14.5772, 121.0620],
+          [14.5680, 121.0595],
+          [14.5574, 121.0544]
+        ]
+      },
+      {
+        id: "seg-11",
+        name: "Kalayaan Avenue ➔ BGC Station",
+        cp: "CP105",
+        status: "staged",
+        statusLabel: "11th Avenue Commercial Spine (Utility Diversion)",
+        contractor: "EEI – Shimizu Joint Venture",
+        color: "#a855f7",
+        distance: "1.0 km",
+        geology: "Guadalupe Tuff Formation",
+        milestone: "Civil staging and test pitting along 11th Avenue.",
+        desc: "Follows 11th Avenue straight south through BGC past 34th St, 32nd St, and 30th St (Bonifacio High Street Central) to BGC Station at 11th Ave & 26th St between Serendra and Market! Market!.",
+        coords: [
+          [14.5574, 121.0544],
+          [14.5535, 121.0543],
+          [14.5492, 121.0543]
+        ]
+      },
+      {
+        id: "seg-12",
+        name: "BGC Station ➔ Lawton ➔ Senate-DepEd",
+        cp: "CP108",
+        status: "staged",
+        statusLabel: "McKinley Parkway & Lawton Ave Corridor",
+        contractor: "Consortium Joint Venture",
+        color: "#a855f7",
+        distance: "3.2 km",
+        geology: "Guadalupe Tuff Formation",
+        milestone: "Boundary fencing, test pitting, and right-of-way handover underway.",
+        desc: "Curves southwest along McKinley Parkway past Market! Market! south and 5th Ave into Lawton Avenue past McKinley West to Lawton Station, then continues south past the Philippine Navy Golf Club and New Senate Building to Senate-DepEd Station.",
+        coords: [
+          [14.5492, 121.0543],
+          [14.5435, 121.0515],
+          [14.5385, 121.0400],
+          [14.5350, 121.0340],
+          [14.5285, 121.0305],
+          [14.5245, 121.0286]
+        ]
+      },
+      {
+        id: "seg-13",
+        name: "Senate-DepEd ➔ NAIA Terminal 3 (Spur Line)",
+        cp: "CP109",
+        status: "staged",
+        statusLabel: "Airport Dedicated Spur (Pending Groundwork)",
+        contractor: "Airport Package Consortium",
+        color: "#a855f7",
+        distance: "1.8 km",
+        geology: "Silty sand and weathered clay",
+        milestone: "Subsurface apron permits coordinated with Manila International Airport Authority.",
+        desc: "Diverges southwest from the South Junction at Senate-DepEd, tunnels beneath Sales Road and Andrews Avenue directly into NAIA Terminal 3.",
+        coords: [
+          [14.5245, 121.0286],
+          [14.5210, 121.0270],
+          [14.5200, 121.0210],
+          [14.5204, 121.0146]
+        ]
+      },
+      {
+        id: "seg-14",
+        name: "Senate-DepEd ➔ FTI & Bicutan (Mainline)",
+        cp: "CP108",
+        status: "staged",
+        statusLabel: "NSCR Co-Location & Groundwork Prep",
+        contractor: "Consortium Joint Venture",
+        color: "#a855f7",
+        distance: "4.3 km",
+        geology: "Laguna / Guadalupe alluvial interface",
+        milestone: "Alignment synchronized with PNR / NSCR viaduct columns at Arca South.",
+        desc: "From South Junction, runs southeast along the PNR railway corridor through FTI Station (Arca South) and runs alongside South Luzon Expressway (SLEX) to southern terminus at Bicutan Station for NSCR interoperability.",
+        coords: [
+          [14.5245, 121.0286],
+          [14.5210, 121.0270],
+          [14.5126, 121.0468],
+          [14.4892, 121.0478]
+        ]
+      }
+    ];
+
+    let map = null;
+    let baseLayer = null;
+    let basemapMode = 0; // 0: Esri Dark Canvas, 1: Esri Satellite, 2: Esri World Street
+
+    const layerGroupCompleted = L.layerGroup();
+    const layerGroupActive = L.layerGroup();
+    const layerGroupCivil = L.layerGroup();
+    const layerGroupStaged = L.layerGroup();
+    const layerGroupStations = L.layerGroup();
+
+    /*
+     * 100% FREE, KEYLESS ESRI ENDPOINTS (ZERO WATERMARKS & ZERO 403s on file:///)
+     */
+    const TILE_ESRI_DARK = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+    const TILE_ESRI_SAT = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    const TILE_ESRI_STREET = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+
+    function initGisMap() {
+      map = L.map('gis-map', {
+        zoomControl: true,
+        attributionControl: false
+      }).setView([14.6150, 121.0480], 12);
+
+      // Default to Esri World Dark Gray Base (watermark-free & works offline/locally)
+      baseLayer = L.tileLayer(TILE_ESRI_DARK, {
+        maxZoom: 16,
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+      }).addTo(map);
+
+      layerGroupCompleted.addTo(map);
+      layerGroupActive.addTo(map);
+      layerGroupCivil.addTo(map);
+      layerGroupStaged.addTo(map);
+      layerGroupStations.addTo(map);
+
+      // Render Polylines
+      segments.forEach(seg => {
+        const isDashed = seg.status === 'staged';
+        const poly = L.polyline(seg.coords, {
+          color: seg.color,
+          weight: seg.status === 'active' ? 7 : (seg.status === 'completed' ? 5.5 : 4.5),
+          opacity: seg.status === 'staged' ? 0.75 : 0.95,
+          dashArray: isDashed ? '8, 8' : null,
+          lineCap: 'round',
+          lineJoin: 'round'
+        });
+
+        poly.on('click', () => selectSegment(seg));
+        poly.on('mouseover', function() { this.setStyle({ weight: 9 }); });
+        poly.on('mouseout', function() {
+          this.setStyle({ weight: seg.status === 'active' ? 7 : (seg.status === 'completed' ? 5.5 : 4.5) });
+        });
+
+        if (seg.status === 'completed') layerGroupCompleted.addLayer(poly);
+        else if (seg.status === 'active') layerGroupActive.addLayer(poly);
+        else if (seg.status === 'civil') layerGroupCivil.addLayer(poly);
+        else if (seg.status === 'staged') layerGroupStaged.addLayer(poly);
+      });
+
+      // Active TBM Markers
+      const activeTbms = [
+        {
+          code: "TBM #2 (SMCC North)",
+          coords: [14.6225, 121.0665],
+          name: "Camp Aguinaldo ➔ Anonas",
+          desc: "Actively mining along Katipunan Ave toward LRT-2 Anonas station receiving wall (~83.9% complete).",
+          segRef: segments[6]
+        },
+        {
+          code: "TBM #1 (SMCC South)",
+          coords: [14.5940, 121.0655],
+          name: "Camp Aguinaldo ➔ Ortigas Box",
+          desc: "Actively boring deep beneath White Plains & Greenmeadows straight toward Ortigas headwall on Meralco Ave (~64.1% complete).",
+          segRef: segments[7]
+        }
+      ];
+
+      activeTbms.forEach(tbm => {
+        const icon = L.divIcon({
+          className: 'tbm-pulse-marker',
+          html: `
+            <div class="relative flex items-center justify-center cursor-pointer">
+              <div class="w-10 h-10 rounded-full bg-amber-500/20 tbm-radar absolute"></div>
+              <div class="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-xl border-2 border-amber-200 font-mono font-bold text-[11px] z-10 hover:scale-110 transition">
+                ⚙
+              </div>
+            </div>
+          `,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
+        });
+
+        const marker = L.marker(tbm.coords, { icon: icon });
+        marker.on('click', () => selectSegment(tbm.segRef));
+        layerGroupActive.addLayer(marker);
+      });
+
+      // Station Nodes (All 17 stations)
+      stations.forEach(stn => {
+        let dotColor = "#0284c7";
+        if (stn.status === 'complete') dotColor = "#10b981";
+        if (stn.status === 'active') dotColor = "#f59e0b";
+        if (stn.status === 'pending') dotColor = "#a855f7";
+
+        const icon = L.divIcon({
+          className: 'stn-marker',
+          html: `
+            <div class="flex items-center gap-1 group cursor-pointer">
+              <div style="background-color: ${dotColor}; width: 14px; height: 14px; border-radius: 9999px; border: 2.5px solid #050811; box-shadow: 0 0 10px ${dotColor};"></div>
+              <span class="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-950/90 text-slate-200 border border-slate-800 shadow-md hidden group-hover:block transition whitespace-nowrap">
+                ${stn.name}
+              </span>
+            </div>
+          `,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+
+        const marker = L.marker([stn.lat, stn.lng], { icon: icon });
+        marker.on('click', () => selectStation(stn));
+        layerGroupStations.addLayer(marker);
+      });
+    }
+
+    // Basemap Mode Cycler: Esri Dark Canvas -> Esri Satellite -> Esri World Street
+    function cycleBasemap() {
+      const modeText = document.getElementById('bm-mode-text');
+      map.removeLayer(baseLayer);
+      
+      basemapMode = (basemapMode + 1) % 3;
+
+      if (basemapMode === 0) { // Esri Dark Canvas
+        baseLayer = L.tileLayer(TILE_ESRI_DARK, { maxZoom: 16, attribution: 'Tiles &copy; Esri' }).addTo(map);
+        if (modeText) modeText.innerText = "Dark Canvas";
+      } else if (basemapMode === 1) { // Esri Satellite
+        baseLayer = L.tileLayer(TILE_ESRI_SAT, { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
+        if (modeText) modeText.innerText = "Satellite Mode";
+      } else { // Esri World Street
+        baseLayer = L.tileLayer(TILE_ESRI_STREET, { maxZoom: 18, attribution: 'Tiles &copy; Esri' }).addTo(map);
+        if (modeText) modeText.innerText = "Street Map";
+      }
+    }
+
+    function updateFilters() {
+      const chkComp = document.getElementById('layer-completed').checked;
+      const chkAct = document.getElementById('layer-active').checked;
+      const chkCiv = document.getElementById('layer-civil').checked;
+      const chkStg = document.getElementById('layer-staged').checked;
+      const chkStn = document.getElementById('layer-stations').checked;
+
+      if (chkComp) map.addLayer(layerGroupCompleted); else map.removeLayer(layerGroupCompleted);
+      if (chkAct) map.addLayer(layerGroupActive); else map.removeLayer(layerGroupActive);
+      if (chkCiv) map.addLayer(layerGroupCivil); else map.removeLayer(layerGroupCivil);
+      if (chkStg) map.addLayer(layerGroupStaged); else map.removeLayer(layerGroupStaged);
+      if (chkStn) map.addLayer(layerGroupStations); else map.removeLayer(layerGroupStations);
+    }
+
+    // Inspect Segment
+    function selectSegment(seg) {
+      document.getElementById('insp-title').innerText = seg.name;
+      document.getElementById('insp-cp-tag').innerText = seg.cp;
+      document.getElementById('insp-dist').innerText = seg.distance;
+      document.getElementById('insp-geology').innerText = seg.geology || "Guadalupe Tuff Formation";
+      document.getElementById('insp-contractor').innerText = seg.contractor;
+      document.getElementById('insp-desc').innerText = seg.desc;
+      document.getElementById('insp-milestone').innerText = seg.milestone;
+
+      const tbmsEl = document.getElementById('insp-tbms');
+      if (seg.tbmActive) {
+        tbmsEl.innerText = `ACTIVE SHIELD: ${seg.tbmId} [Progress: ${seg.tbmProgress}]`;
+        tbmsEl.className = "text-[11px] text-amber-400 font-mono pt-1 font-bold animate-pulse";
+      } else {
+        tbmsEl.innerText = `Allocated Package: ${seg.cp}`;
+        tbmsEl.className = "text-[11px] text-slate-400 font-mono pt-1";
+      }
+
+      const statusEl = document.getElementById('insp-status-badge');
+      statusEl.innerText = seg.statusLabel;
+
+      if (seg.status === 'completed') {
+        statusEl.className = "p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-700 text-emerald-300 font-mono text-xs font-bold";
+      } else if (seg.status === 'active') {
+        statusEl.className = "p-2.5 rounded-xl bg-amber-950/80 border border-amber-600 text-amber-300 font-mono text-xs font-bold animate-pulse";
+      } else if (seg.status === 'civil') {
+        statusEl.className = "p-2.5 rounded-xl bg-sky-950/80 border border-sky-700 text-sky-300 font-mono text-xs font-bold";
+      } else {
+        statusEl.className = "p-2.5 rounded-xl bg-purple-950/80 border border-purple-700 text-purple-300 font-mono text-xs font-bold";
+      }
+    }
+
+    // Inspect Station
+    function selectStation(stn) {
+      document.getElementById('insp-title').innerText = `${stn.name} Station`;
+      document.getElementById('insp-cp-tag').innerText = stn.cp;
+      document.getElementById('insp-dist').innerText = stn.depth;
+      document.getElementById('insp-geology').innerText = "Guadalupe Formation (Bedrock)";
+      document.getElementById('insp-contractor').innerText = stn.contractor;
+      document.getElementById('insp-desc').innerText = `${stn.desc} Interchange connection: ${stn.interchange}.`;
+      document.getElementById('insp-milestone').innerText = `Station package under ${stn.cp}. Depth: ${stn.depth}. Platform level civil works ongoing.`;
+
+      const tbmsEl = document.getElementById('insp-tbms');
+      tbmsEl.innerText = `Interchange: ${stn.interchange}`;
+      tbmsEl.className = "text-[11px] text-cyan-400 font-mono pt-1";
+
+      const statusEl = document.getElementById('insp-status-badge');
+      if (stn.status === 'complete') {
+        statusEl.innerText = "Station Box / Portal Connected";
+        statusEl.className = "p-2.5 rounded-xl bg-emerald-950/80 border border-emerald-700 text-emerald-300 font-mono text-xs font-bold";
+      } else if (stn.status === 'active') {
+        statusEl.innerText = "Active Tunneling Launch / Receiving Box";
+        statusEl.className = "p-2.5 rounded-xl bg-amber-950/80 border border-amber-600 text-amber-300 font-mono text-xs font-bold animate-pulse";
+      } else {
+        statusEl.innerText = "Station Box Cut & Cover Civil Staging";
+        statusEl.className = "p-2.5 rounded-xl bg-purple-950/80 border border-purple-700 text-purple-300 font-mono text-xs font-bold";
+      }
+    }
+
+    // Spatial Focus Jumps
+    function mapFocus(point) {
+      if (!map) return;
+      if (point === 'activeTBMs') {
+        map.flyTo([14.6110, 121.0660], 14, { duration: 0.9 });
+      } else if (point === 'tbm1') {
+        map.flyTo([14.5940, 121.0655], 15, { duration: 0.8 });
+        selectSegment(segments[7]);
+      } else if (point === 'tbm2') {
+        map.flyTo([14.6225, 121.0665], 15, { duration: 0.8 });
+        selectSegment(segments[6]);
+      } else if (point === 'mindanao') {
+        map.flyTo([14.6780, 121.0310], 14, { duration: 0.8 });
+        selectSegment(segments[1]);
+      } else if (point === 'vmmc') {
+        map.flyTo([14.6540, 121.0320], 15.5, { duration: 0.8 });
+        selectStation(stations[3]);
+      } else if (point === 'quezonave') {
+        map.flyTo([14.6445, 121.0385], 15.5, { duration: 0.8 });
+        selectStation(stations[4]);
+      } else if (point === 'whiteplains') {
+        map.flyTo([14.5940, 121.0655], 15, { duration: 0.8 });
+        selectSegment(segments[7]);
+      } else if (point === 'bgc') {
+        map.flyTo([14.5492, 121.0543], 15.5, { duration: 0.8 });
+        selectStation(stations[11]);
+      } else if (point === 'naiaBranch') {
+        map.flyTo([14.5204, 121.0146], 15, { duration: 0.8 });
+        selectStation(stations[14]);
+      } else {
+        map.flyTo([14.6150, 121.0480], 12, { duration: 0.8 });
+      }
+    }
+
+    // Populate Sidebar Segment Directory
+    function populateSidebarList() {
+      const container = document.getElementById('segment-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      segments.forEach(seg => {
+        let badgeColor = "bg-purple-950 text-purple-400 border-purple-800";
+        if (seg.status === 'completed') badgeColor = "bg-emerald-950 text-emerald-300 border-emerald-800";
+        if (seg.status === 'active') badgeColor = "bg-amber-950 text-amber-300 border-amber-600 animate-pulse";
+        if (seg.status === 'civil') badgeColor = "bg-sky-950 text-sky-300 border-sky-800";
+
+        const btn = document.createElement('div');
+        btn.className = "p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 hover:bg-slate-850 cursor-pointer transition space-y-1";
+        btn.onclick = () => {
+          selectSegment(seg);
+          const midIdx = Math.floor(seg.coords.length / 2);
+          map.flyTo(seg.coords[midIdx], 14, { duration: 0.7 });
+        };
+
+        btn.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-800 text-cyan-400 border border-slate-700">${seg.cp}</span>
+            <span class="text-[9px] font-mono px-1.5 py-0.2 rounded border ${badgeColor}">
+              ${seg.status === 'completed' ? 'Holed' : (seg.status === 'active' ? 'Mining' : (seg.status === 'civil' ? 'Station Pit' : 'Staged'))}
+            </span>
+          </div>
+          <div class="text-xs font-bold text-white truncate">${seg.name}</div>
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+            <span>${seg.distance}</span>
+            <span class="text-slate-500 truncate max-w-[120px]">${seg.contractor.split(' ')[0]}</span>
+          </div>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initGisMap();
+      populateSidebarList();
+      selectSegment(segments[7]);
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
