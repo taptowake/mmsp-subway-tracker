@@ -13,9 +13,8 @@
     :root {
       --bg-dark: #070d18;
       --card-bg: #0d1726;
-      --card-inner: rgba(16, 29, 51, 0.85);
+      --card-inner: rgba(16, 29, 51, 0.92);
       --border: rgba(255, 255, 255, 0.12);
-      --border-focus: rgba(56, 189, 248, 0.35);
       --accent-green: #10b981;
       --accent-amber: #f59e0b;
       --accent-blue: #38bdf8;
@@ -32,7 +31,7 @@
     body, html {
       width: 100%;
       height: 100%;
-      overflow-x: hidden;
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg-dark);
       color: var(--text-main);
@@ -40,38 +39,48 @@
     #dashboard-wrapper {
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
       width: 100%;
-      padding: 14px 16px;
-      gap: 12px;
+      height: 100%;
+      position: relative;
     }
 
-    /* Executive Header */
+    /* Top Elements Panel (Desktop Bar / Mobile Collapsible Flyout) */
+    #top-elements-panel {
+      background: #091220;
+      border-bottom: 1px solid var(--border);
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px 8px;
+      gap: 10px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    }
+
     .header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
     .brand-title-wrap {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .brand-logo-btn {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       background: linear-gradient(135deg, #0284c7, #2563eb);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 14px rgba(37, 99, 235, 0.5);
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
     }
     .brand-logo-btn svg {
-      width: 22px;
-      height: 22px;
+      width: 18px;
+      height: 18px;
       fill: none;
       stroke: #fff;
       stroke-width: 2.2;
@@ -83,8 +92,8 @@
     .brand-subline {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
+      gap: 6px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--accent-blue);
       letter-spacing: 0.5px;
@@ -92,243 +101,193 @@
     .brand-badge {
       background: rgba(56, 189, 248, 0.15);
       border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 1px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 9px;
     }
     .brand-mainline {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.3px;
     }
     .brand-mainline span {
       font-weight: 500;
       color: var(--text-muted);
-      font-size: 13px;
-    }
-    .view-switcher {
-      display: flex;
-      gap: 6px;
-      background: rgba(13, 23, 38, 0.8);
-      border: 1px solid var(--border);
-      padding: 4px;
-      border-radius: 10px;
-    }
-    .view-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
       font-size: 12px;
+    }
+
+    .top-action-btns {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-action-top {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
       font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 7px;
+      padding: 5px 11px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      transition: all 0.2s;
     }
-    .view-btn.active {
-      background: #0284c7;
+    .btn-action-top:hover {
       color: #fff;
+      border-color: var(--accent-blue);
+    }
+    .btn-minimize-mobile {
+      display: none;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--accent-blue);
+      font-weight: 700;
     }
 
-    /* Executive KPI Strip */
+    /* KPI Row */
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
     }
     .kpi-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
+      border-radius: 8px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
     }
     .kpi-box-top {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--text-muted);
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .kpi-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
     }
     .kpi-metric {
-      font-size: 22px;
+      font-size: 17px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
       display: flex;
       align-items: baseline;
-      gap: 4px;
+      gap: 3px;
     }
     .kpi-metric span {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
       font-weight: 500;
     }
     .kpi-sub {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
-      margin-top: 2px;
     }
 
-    /* Map Box Workspace */
-    .map-container-card {
-      background: var(--card-bg);
+    /* Jump Strip */
+    .jump-strip {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .jump-strip::-webkit-scrollbar { display: none; }
+    .jump-chip {
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .map-header-inner {
-      padding: 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(13, 23, 38, 0.95);
-    }
-    .map-title-sub {
-      font-size: 13px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .map-desc-text {
-      font-size: 11px;
       color: var(--text-muted);
-      margin-top: 1px;
-    }
-    .status-tags-wrap {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .tag-badge {
+      padding: 4px 10px;
+      border-radius: 14px;
       font-size: 10.5px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
     }
-    .tag-tunneled {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: rgba(16, 185, 129, 0.4);
-      color: var(--accent-green);
+    .jump-chip:hover, .jump-chip.active {
+      color: #fff;
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.18);
     }
-    .tag-active-tbm {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: rgba(245, 158, 11, 0.4);
+    .jump-chip.tbm-highlight {
+      border-color: rgba(245, 158, 11, 0.5);
       color: var(--accent-amber);
-    }
-    .tag-station-box {
-      background: rgba(56, 189, 248, 0.15);
-      border-color: rgba(56, 189, 248, 0.4);
-      color: var(--accent-blue);
-    }
-    .tag-staged {
-      background: rgba(192, 132, 252, 0.15);
-      border-color: rgba(192, 132, 252, 0.4);
-      color: var(--accent-purple);
+      background: rgba(245, 158, 11, 0.1);
     }
 
+    /* Floating Header Reopen Pill (Shown when flyout is closed) */
+    #btn-reopen-flyout {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 1050;
+      background: rgba(11, 21, 38, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+    }
+    #btn-reopen-flyout .dot-live {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+    }
+
+    /* Map Workspace */
     #map {
+      flex: 1;
       width: 100%;
-      height: 600px;
+      height: 100%;
       background: #070d18;
       z-index: 1;
     }
 
-    /* Floating Left Control Overlay */
-    .map-floating-overlay {
+    /* Pill Legend Capsule */
+    .pill-legend {
       position: absolute;
-      bottom: 16px;
-      left: 16px;
-      z-index: 998;
-      background: rgba(13, 23, 38, 0.94);
+      top: 14px;
+      right: 14px;
+      z-index: 1000;
+      background: rgba(11, 21, 38, 0.9);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 14px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      max-width: 290px;
-    }
-    .overlay-title {
-      font-size: 9.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .basemap-btn-group {
+      border-radius: 20px;
+      padding: 5px 12px;
       display: flex;
-      gap: 4px;
-      margin-bottom: 10px;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
     }
-    .basemap-opt {
-      flex: 1;
-      padding: 5px 8px;
-      font-size: 10.5px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-    }
-    .basemap-opt.active {
-      background: #0284c7;
-      color: #fff;
-      border-color: #0284c7;
-    }
-    .quick-jump-wrap {
+    .legend-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #cbd5e1;
       display: flex;
-      flex-direction: column;
-      gap: 5px;
+      align-items: center;
+      gap: 6px;
     }
-    .jump-row {
-      display: flex;
-      gap: 4px;
-    }
-    .jump-btn {
-      flex: 1;
-      padding: 5px 6px;
-      font-size: 10px;
-      font-weight: 700;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .jump-btn:hover {
-      color: var(--text-main);
-      border-color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.15);
-    }
-    .jump-btn.tbm-alert {
-      border-color: rgba(245, 158, 11, 0.5);
-      color: var(--accent-amber);
-      background: rgba(245, 158, 11, 0.1);
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
     }
 
     /* Permanent Station Tooltips / Medallion Badges */
@@ -351,7 +310,6 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .station-badge-num {
       width: 18px;
@@ -416,107 +374,36 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Bottom TBM Live Status Banners */
-    .tbm-cards-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-      gap: 12px;
-    }
-    .tbm-shield-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 10px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .tbm-shield-card:hover {
-      border-color: rgba(245, 158, 11, 0.8);
-    }
-    .tbm-shield-badge-icon {
-      width: 34px;
-      height: 34px;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.5);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .tbm-shield-badge-icon svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: var(--accent-amber);
-      stroke-width: 2.2;
-    }
-    .tbm-shield-info {
-      flex: 1;
-    }
-    .tbm-shield-head {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 2px;
-    }
-    .tbm-shield-title {
-      font-size: 13px;
-      font-weight: 800;
-    }
-    .tbm-dir-tag {
-      font-size: 9.5px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .tbm-shield-loc {
-      font-size: 11.5px;
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-    .tbm-shield-metrics {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Inspector Bottom Sheet / Mobile Drawer */
+    /* Bottom Inspector Drawer */
     #inspector-sheet {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      max-height: 82vh;
-      background: rgba(11, 21, 38, 0.97);
+      max-height: 52vh;
+      background: rgba(11, 21, 38, 0.98);
       border-top: 1px solid var(--border);
-      border-radius: 20px 20px 0 0;
+      border-radius: 18px 18px 0 0;
       z-index: 2000;
-      padding: 14px 20px calc(16px + env(safe-area-inset-bottom));
+      padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
       transform: translateY(105%);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       backdrop-filter: blur(20px);
       box-shadow: 0 -12px 35px rgba(0,0,0,0.7);
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
     #inspector-sheet.open {
       transform: translateY(0%);
     }
     .sheet-handle {
-      width: 38px;
+      width: 36px;
       height: 4px;
       border-radius: 2px;
       background: rgba(255, 255, 255, 0.25);
-      margin: 0 auto 6px;
+      margin: 0 auto 4px;
     }
     .sheet-head {
       display: flex;
@@ -545,7 +432,7 @@
       border-radius: 2px;
     }
     .sheet-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       letter-spacing: -0.3px;
     }
@@ -556,9 +443,9 @@
     }
     .badge {
       display: inline-block;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 800;
-      padding: 3px 9px;
+      padding: 3px 8px;
       border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -568,12 +455,11 @@
       background: none;
       border: none;
       color: var(--text-muted);
-      font-size: 22px;
+      font-size: 20px;
       cursor: pointer;
       line-height: 1;
     }
 
-    /* 2-Column Parameter Grid */
     .insp-grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -583,191 +469,166 @@
       background: var(--card-inner);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 7px 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
     .spec-card span {
       display: block;
-      font-size: 9.5px;
+      font-size: 9px;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.4px;
       font-weight: 700;
     }
     .spec-card strong {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
     }
-
-    /* Trajectory & Location Details Block */
     .insp-block {
       background: var(--card-inner);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 9px 12px;
+      padding: 8px 10px;
       display: flex;
       flex-direction: column;
       gap: 3px;
     }
     .insp-block-label {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .insp-block-desc {
-      font-size: 11.5px;
+      font-size: 11px;
       color: #cbd5e1;
-      line-height: 1.45;
+      line-height: 1.4;
     }
 
-    @media (max-width: 640px) {
-      #dashboard-wrapper { padding: 10px; }
-      .map-floating-overlay {
-        bottom: 8px;
-        left: 8px;
-        right: 8px;
-        max-width: none;
+    /* Mobile Flyout Adaptations */
+    @media (max-width: 768px) {
+      #top-elements-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.85);
+        border-radius: 0 0 16px 16px;
       }
-      #map { height: 480px; }
-      .tbm-cards-strip { grid-template-columns: 1fr; }
-      .insp-grid-2 { grid-template-columns: 1fr; }
+      #top-elements-panel.minimized {
+        transform: translateY(-102%);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .btn-minimize-mobile {
+        display: flex;
+      }
+      #btn-reopen-flyout {
+        display: flex;
+      }
+      .pill-legend {
+        top: auto;
+        bottom: 14px;
+        right: 14px;
+      }
+      .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      #inspector-sheet {
+        max-height: 48vh;
+      }
     }
   </style>
 </head>
 <body>
   <div id="dashboard-wrapper">
-    <!-- Top Header -->
-    <header class="header-bar">
-      <div class="brand-title-wrap">
-        <div class="brand-logo-btn">
-          <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+    <!-- Reopen Overview Button (Visible on mobile when header is collapsed) -->
+    <button id="btn-reopen-flyout">
+      <span class="dot-live"></span>
+      <span>Telemetry Overview</span>
+    </button>
+
+    <!-- Top Collapsible Panel / Mobile Flyout -->
+    <header id="top-elements-panel">
+      <div class="header-bar">
+        <div class="brand-title-wrap">
+          <div class="brand-logo-btn">
+            <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          </div>
+          <div class="brand-headings">
+            <div class="brand-subline">
+              <span class="brand-badge">DOTr • JICA ODA MMSP</span>
+              <span>OCTOBER 2026 STATUS</span>
+            </div>
+            <div class="brand-mainline">
+              Metro Manila Subway <span>| TBM Position & Alignment</span>
+            </div>
+          </div>
         </div>
-        <div class="brand-headings">
-          <div class="brand-subline">
-            <span class="brand-badge">DOTr • JICA ODA MMSP</span>
-            <span>OCTOBER 2026 STATUS</span>
-          </div>
-          <div class="brand-mainline">
-            Metro Manila Subway <span>| TBM Position & Alignment Telemetry</span>
-          </div>
+
+        <div class="top-action-btns">
+          <button id="basemap-btn" class="btn-action-top">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            <span id="basemap-label">Satellite</span>
+          </button>
+          <button id="btn-minimize-top" class="btn-action-top btn-minimize-mobile">
+            <span>View Map (Minimize) &times;</span>
+          </button>
         </div>
       </div>
-      <div class="view-switcher">
-        <button class="view-btn active"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg> Geographic NCR Map</button>
-        <button class="view-btn" onclick="map.fitBounds(fullPolyline.getBounds(), { padding: [30, 30] })"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg> Alignment Schematic</button>
-        <button class="view-btn" onclick="openInspector('CP101-108 Contract Matrix', 'CP101 to CP108', 'ACTIVE CIVIL WORKS', 'rgba(56, 189, 248, 0.15)', 'rgba(56, 189, 248, 0.4)', '#38bdf8', '33.1 km Total System', 'Guadalupe Tuff Formation', 'Multi-Consortium', 'Comprehensive civil contract breakdown: CP101 (Shimizu JV), CP102 (Nishimatsu JV), CP103 (SMCC), CP104 (Megawide JV), CP105 (Civil prep), CP106 (Senate prep), CP107 (NAIA T3 Spur), CP108 (Joint NSCR Works).', 'Full Line 9 Transit Network', 'DOTr Detailed Engineering Package')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> Contract Matrix</button>
+
+      <!-- KPI Metrics Strip -->
+      <div class="kpi-row">
+        <div class="kpi-box">
+          <div class="kpi-box-top">Full Line Extent</div>
+          <div class="kpi-metric">33.1 <span>km (17 Stns)</span></div>
+          <div class="kpi-sub">Valenzuela &rarr; Bicutan / NAIA T3</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-green)"></div> Completed Bores</div>
+          <div class="kpi-metric" style="color:var(--accent-green)">~8.4 <span>km holed</span></div>
+          <div class="kpi-sub">CP101 Twin + CP102 Q.Ave</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-amber)"></div> Active TBMs</div>
+          <div class="kpi-metric" style="color:var(--accent-amber)">2 <span>Shields Boring</span></div>
+          <div class="kpi-sub">Camp Aguinaldo N & S Drives</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-blue)"></div> Station Boxes</div>
+          <div class="kpi-metric" style="color:var(--accent-blue)">3 <span>Deep Pits Active</span></div>
+          <div class="kpi-sub">East Ave, Ortigas, Shaw Box</div>
+        </div>
+      </div>
+
+      <!-- Spatial Quick Jump Chips -->
+      <div class="jump-strip">
+        <button class="jump-chip active" onclick="focusFullRoute()">Full Line</button>
+        <button class="jump-chip tbm-highlight" onclick="focusFeature(14.6080, 121.0690, 14.5)">⚡ Active TBMs</button>
+        <button class="jump-chip" onclick="focusFeature(14.70835, 121.01377, 15)">CP101 Valenzuela</button>
+        <button class="jump-chip" onclick="focusFeature(14.64586, 121.03689, 15)">CP102 Q.Ave</button>
+        <button class="jump-chip" onclick="focusFeature(14.5942, 121.0690, 15.5)">White Plains TBM</button>
+        <button class="jump-chip" onclick="focusFeature(14.58535, 121.06411, 15.5)">CP104 Ortigas</button>
+        <button class="jump-chip" onclick="focusFeature(14.54945, 121.05460, 15.5)">CP105 BGC</button>
+        <button class="jump-chip" onclick="focusFeature(14.52037, 121.01503, 15.5)">CP107 NAIA T3</button>
+        <button class="jump-chip" onclick="focusFeature(14.48803, 121.04544, 15)">Bicutan Terminus</button>
       </div>
     </header>
 
-    <!-- KPI Metric Cards Strip -->
-    <div class="kpi-row">
-      <div class="kpi-box">
-        <div class="kpi-box-top">Full Line Extent</div>
-        <div class="kpi-metric">33.1 <span>km (17 Stns)</span></div>
-        <div class="kpi-sub">Valenzuela &rarr; Bicutan / NAIA T3</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-green)"></div> Completed Bores</div>
-        <div class="kpi-metric" style="color:var(--accent-green)">~8.4 <span>km holed</span></div>
-        <div class="kpi-sub">CP101 Twin + CP102 Q.Ave</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-amber)"></div> Active TBMs</div>
-        <div class="kpi-metric" style="color:var(--accent-amber)">2 <span>Shields Boring</span></div>
-        <div class="kpi-sub">Camp Aguinaldo N & S Drives</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-blue)"></div> Station Boxes</div>
-        <div class="kpi-metric" style="color:var(--accent-blue)">3 <span>Deep Pits Active</span></div>
-        <div class="kpi-sub">East Ave, Ortigas, Shaw Box</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box-top"><div class="kpi-dot" style="background:var(--accent-purple)"></div> Staged / Civil ROW</div>
-        <div class="kpi-metric" style="color:var(--accent-purple)">CP105-09</div>
-        <div class="kpi-sub">BGC, Lawton, NAIA T3, FTI</div>
-      </div>
+    <div id="map"></div>
+
+    <!-- Map Status Legend Capsule -->
+    <div class="pill-legend">
+      <div class="legend-tag"><div class="legend-dot" style="background:var(--accent-green)"></div> Holed</div>
+      <div class="legend-tag"><div class="legend-dot" style="background:var(--accent-amber)"></div> Boring</div>
+      <div class="legend-tag"><div class="legend-dot" style="background:var(--accent-blue)"></div> Box Cut</div>
     </div>
 
-    <!-- Map Container Card -->
-    <div class="map-container-card">
-      <div class="map-header-inner">
-        <div>
-          <div class="map-title-sub">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-            Metro Manila (NCR) Geographical Subway Trace
-          </div>
-          <div class="map-desc-text">Accurate geographic trajectory traced along Mindanao Ave, Katipunan, C-5, Meralco Ave, BGC, and NAIA T3 spur.</div>
-        </div>
-        <div class="status-tags-wrap">
-          <div class="tag-badge tag-tunneled"><div class="kpi-dot" style="background:var(--accent-green)"></div> Tunneled Out (Complete)</div>
-          <div class="tag-badge tag-active-tbm"><div class="kpi-dot" style="background:var(--accent-amber)"></div> Active TBM Underground</div>
-          <div class="tag-badge tag-station-box"><div class="kpi-dot" style="background:var(--accent-blue)"></div> Station Box / No TBM</div>
-          <div class="tag-badge tag-staged"><div class="kpi-dot" style="background:var(--accent-purple)"></div> ROW Prep / Pending</div>
-        </div>
-      </div>
-
-      <div id="map"></div>
-
-      <!-- Left Bottom Floating Control -->
-      <div class="map-floating-overlay">
-        <div class="overlay-title">Basemap Style</div>
-        <div class="basemap-btn-group">
-          <button id="btn-dark" class="basemap-opt" onclick="setBasemap('dark')">Dark Grid</button>
-          <button id="btn-sat" class="basemap-opt active" onclick="setBasemap('satellite')">Satellite</button>
-          <button id="btn-std" class="basemap-opt" onclick="setBasemap('standard')">Standard</button>
-        </div>
-        <div class="overlay-title">Map Quick Jumps</div>
-        <div class="quick-jump-wrap">
-          <div class="jump-row">
-            <button class="jump-btn" onclick="flyToCoord(14.67471, 121.03213, 14.5)">CP101 North</button>
-            <button class="jump-btn tbm-alert" onclick="flyToCoord(14.6080, 121.0690, 14.5)">Active TBMs</button>
-          </div>
-          <div class="jump-row">
-            <button class="jump-btn" onclick="flyToCoord(14.58535, 121.06411, 15)">CP104 Ortigas</button>
-            <button class="jump-btn" onclick="flyToCoord(14.5204, 121.0150, 15.5)">CP107 NAIA T3</button>
-          </div>
-          <div class="jump-row">
-            <button class="jump-btn" style="flex:1" onclick="map.fitBounds(fullPolyline.getBounds(), { padding: [30, 30] })">Full Alignment</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Active TBM Telemetry Cards -->
-    <div class="tbm-cards-strip">
-      <div class="tbm-shield-card" onclick="flyToCoord(14.5942, 121.0690, 16.5); openInspector('TBM #1 (South Shaft)', 'CP103', 'ACTIVE BORING (~64%)', 'rgba(245, 158, 11, 0.15)', 'rgba(245, 158, 11, 0.4)', '#f59e0b', '34.0m depth', 'Guadalupe Bedrock', 'Sumitomo Mitsui Construction Co.', 'Active EPB shield boring deep below White Plains and Greenmeadows (Quezon City/Pasig boundary) toward Ortigas Station Meralco Ave D-wall.', 'Future MRT-4 / Ortigas CBD / Metrowalk', 'Completed ~1,840m / 2,871m (~64.1%) total contract drive.')">
-        <div class="tbm-shield-badge-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
-        </div>
-        <div class="tbm-shield-info">
-          <div class="tbm-shield-head">
-            <div class="tbm-shield-title">TBM #1 (SOUTH SHAFT)</div>
-            <span class="tbm-dir-tag">BORING SOUTH</span>
-          </div>
-          <div class="tbm-shield-loc">Subsurface position: <strong>Deep beneath White Plains / Greenmeadows (Quezon City/Pasig boundary)</strong>.</div>
-          <div class="tbm-shield-metrics">Target: Ortigas Station Meralco Ave D-wall &bull; Completed ~1,840m / 2,871m (~64.1%)</div>
-        </div>
-      </div>
-
-      <div class="tbm-shield-card" onclick="flyToCoord(14.6231, 121.0668, 16.5); openInspector('TBM #2 (North Shaft)', 'CP103', 'ACTIVE BORING (~84%)', 'rgba(245, 158, 11, 0.15)', 'rgba(245, 158, 11, 0.4)', '#f59e0b', '28.5m depth', 'Guadalupe Tuff Formation', 'Sumitomo Mitsui Construction Co.', 'Active Earth Pressure Balance (EPB) Shield advancing north beneath Katipunan Avenue approaching LRT-2 Anonas reception headwall.', 'LRT-2 Anonas Station concourse', 'Completed ~1,155m / 1,377m (~83.9%) total contract drive.')">
-        <div class="tbm-shield-badge-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
-        </div>
-        <div class="tbm-shield-info">
-          <div class="tbm-shield-head">
-            <div class="tbm-shield-title">TBM #2 (NORTH SHAFT)</div>
-            <span class="tbm-dir-tag">BORING NORTH</span>
-          </div>
-          <div class="tbm-shield-loc">Subsurface position: <strong>Beneath Katipunan Ave approaching Aurora Blvd & LRT-2 Anonas</strong>.</div>
-          <div class="tbm-shield-metrics">Target: Anonas Station Box South Portal &bull; Completed ~1,155m / 1,377m (~83.9%)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inspector Drawer Sheet with Full Details & Trajectory Section -->
+    <!-- Bottom Inspector Drawer -->
     <div id="inspector-sheet">
       <div class="sheet-handle"></div>
       <div class="sheet-head">
@@ -784,7 +645,6 @@
         </div>
       </div>
 
-      <!-- Depth & Strata Row -->
       <div class="insp-grid-2">
         <div class="spec-card">
           <span>Depth / Distance</span>
@@ -796,7 +656,6 @@
         </div>
       </div>
 
-      <!-- Details & Trajectory Block -->
       <div class="insp-block">
         <div class="insp-block-label" style="color:var(--accent-blue)">Details & Trajectory</div>
         <div id="insp-desc" class="insp-block-desc">
@@ -804,16 +663,14 @@
         </div>
       </div>
 
-      <!-- Contractor Consortium & Interchange Block -->
       <div class="insp-block">
         <div class="insp-block-label">Contractor Consortium</div>
-        <strong id="insp-contractor" style="font-size:12px; font-weight:700; margin-bottom:2px;">Tokyu-Tobishima-Megawide JV</strong>
-        <div id="insp-interchange" class="insp-block-desc" style="color:var(--accent-blue); font-size:11px;">
+        <strong id="insp-contractor" style="font-size:11.5px; font-weight:700; margin-bottom:1px;">Tokyu-Tobishima-Megawide JV</strong>
+        <div id="insp-interchange" class="insp-block-desc" style="color:var(--accent-blue); font-size:10.5px;">
           Interchange: Future MRT-4 / Ortigas CBD / Metrowalk
         </div>
       </div>
 
-      <!-- Status & Verification Block -->
       <div class="insp-block">
         <div class="insp-block-label">Status & Verification</div>
         <div id="insp-verification" class="insp-block-desc">
@@ -824,7 +681,7 @@
   </div>
 
   <script>
-    // 1. Keyless Public Basemaps
+    // 1. Basemaps
     const darkTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
       attribution: 'Esri, HERE, Garmin, OpenStreetMap'
@@ -835,40 +692,66 @@
       attribution: 'Esri, Maxar, Earthstar Geographics'
     });
 
-    const stdTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    });
-
     const map = L.map('map', {
       center: [14.6150, 121.0450],
       zoom: 12,
-      layers: [satTiles], // Satellite view default
-      zoomControl: true
+      layers: [darkTiles],
+      zoomControl: false
+    });
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+
+    let isSatellite = false;
+    document.getElementById('basemap-btn').addEventListener('click', () => {
+      if (isSatellite) {
+        map.removeLayer(satTiles);
+        map.addLayer(darkTiles);
+        document.getElementById('basemap-label').innerText = 'Satellite';
+      } else {
+        map.removeLayer(darkTiles);
+        map.addLayer(satTiles);
+        document.getElementById('basemap-label').innerText = 'Dark Basemap';
+      }
+      isSatellite = !isSatellite;
     });
 
-    let activeLayer = satTiles;
-    function setBasemap(type) {
-      map.removeLayer(activeLayer);
-      document.querySelectorAll('.basemap-opt').forEach(b => b.classList.remove('active'));
-      if (type === 'dark') {
-        activeLayer = darkTiles;
-        document.getElementById('btn-dark').classList.add('active');
-      } else if (type === 'standard') {
-        activeLayer = stdTiles;
-        document.getElementById('btn-std').classList.add('active');
-      } else {
-        activeLayer = satTiles;
-        document.getElementById('btn-sat').classList.add('active');
+    // 2. Mobile Flyout Controller
+    const topPanel = document.getElementById('top-elements-panel');
+    const btnMinimizeTop = document.getElementById('btn-minimize-top');
+    const btnReopenFlyout = document.getElementById('btn-reopen-flyout');
+
+    btnMinimizeTop.addEventListener('click', () => {
+      topPanel.classList.add('minimized');
+    });
+
+    btnReopenFlyout.addEventListener('click', () => {
+      topPanel.classList.remove('minimized');
+    });
+
+    // 3. Dynamic Center-Top Map Focusing (Leaves Bottom Clear for Drawer)
+    function focusFeature(lat, lng, zoom) {
+      if (window.innerWidth <= 768) {
+        topPanel.classList.add('minimized');
       }
-      map.addLayer(activeLayer);
+      
+      const targetZoom = zoom || map.getZoom();
+      const targetLatLng = L.latLng(lat, lng);
+      
+      // Calculate pixel offset so element appears in the upper half of screen
+      const containerHeight = map.getSize().y;
+      const verticalOffset = (window.innerWidth <= 768) ? -(containerHeight * 0.22) : -(containerHeight * 0.14);
+
+      map.setView(targetLatLng, targetZoom, { animate: false });
+      map.panBy([0, -verticalOffset], { duration: 0.8 });
     }
 
-    function flyToCoord(lat, lng, zoom) {
-      map.flyTo([lat, lng], zoom, { duration: 1.2 });
+    function focusFullRoute() {
+      if (window.innerWidth <= 768) {
+        topPanel.classList.add('minimized');
+      }
+      map.fitBounds(fullPolyline.getBounds(), { padding: [40, 40] });
     }
 
-    // 2. Authoritative Station Data with Details, Trajectory & Interchanges
+    // 4. Station Data
     const stations = [
       {
         num: 1, id: "13686694947", code: "BL01", name: "East Valenzuela", cp: "CP101",
@@ -1042,165 +925,119 @@
       }
     ];
 
-    // 3. Official Vector Coordinates for Mainline (Cleaned of legacy crossbars)
+    // 5. Raw Vectors
     const mainlinePoints = [
-      [14.7093792, 121.0136209],[14.7083534, 121.0137702],[14.7062270, 121.0140797],[14.7060278, 121.0141146],[14.7058300, 121.0141584],[14.7056367, 121.0142104],[14.7054459, 121.0142707],[14.7032617, 121.0150295],[14.7006146, 121.0163034],[14.7004750, 121.0163723],[14.7003509, 121.0164380],[14.7002147, 121.0165106],[14.7000741, 121.0165888],[14.6999362, 121.0166724],[14.6998014, 121.0167612],[14.6996701, 121.0168548],[14.6995423, 121.0169534],[14.6994181, 121.0170568],[14.6992978, 121.0171647],[14.6927146, 121.0232849],[14.6926330, 121.0233614],[14.6925568, 121.0234449],[14.6924872, 121.0235343],[14.6924213, 121.0236271],[14.6923648, 121.0237273],[14.6923124, 121.0238268],[14.6922648, 121.0239390],[14.6922335, 121.0240476],[14.6922095, 121.0241628],[14.6921931, 121.0242681],[14.6921318, 121.0247878],[14.6921151, 121.0249265],[14.6920912, 121.0250640],[14.6920602, 121.0251999],[14.6920221, 121.0253340],[14.6919772, 121.0254657],[14.6919255, 121.0255948],[14.6918663, 121.0257224],[14.6918005, 121.0258465],[14.6917283, 121.0259667],[14.6916499, 121.0260827],[14.6915655, 121.0261941],[14.6914754, 121.0263006],[14.6908172, 121.0269393],[14.6904768, 121.0272843],[14.6901124, 121.0276778],[14.6893391, 121.0285306],[14.6887503, 121.0293469],[14.6886869, 121.0292853],[14.6886325, 121.0293099],[14.6883607, 121.0296189],[14.6880528, 121.0299393],[14.6877255, 121.0302724],[14.6874766, 121.0305057],[14.6872196, 121.0307465],[14.6869557, 121.0309759],[14.6867780, 121.0310856],[14.6865935, 121.0312129],[14.6864052, 121.0313188],[14.6862126, 121.0314160],[14.6860160, 121.0315043],[14.6856759, 121.0316407],[14.6854993, 121.0317051],[14.6853215, 121.0317532],[14.6851375, 121.0317889],[14.6849566, 121.0318129],[14.6837301, 121.0318934],[14.6796584, 121.0320072],[14.6771567, 121.0320722],[14.6764103, 121.0320851],[14.6747101, 121.0321300],[14.6730122, 121.0321749],[14.6711927, 121.0322202],[14.6709763, 121.0322496],[14.6707612, 121.0322885],[14.6705480, 121.0323366],[14.6703368, 121.0323940],[14.6701282, 121.0324606],[14.6699225, 121.0325361],[14.6697201, 121.0326206],[14.6695269, 121.0327110],[14.6693375, 121.0328096],[14.6691521, 121.0329160],[14.6689711, 121.0330302],[14.6687948, 121.0331520],[14.6686234, 121.0332812],[14.6684573, 121.0334174],[14.6669275, 121.0347807],[14.6667170, 121.0349689],[14.6665004, 121.0351495],[14.6662779, 121.0353224],[14.6660499, 121.0354873],[14.6658165, 121.0356441],[14.6655781, 121.0357926],[14.6653350, 121.0359325],[14.6650873, 121.0360638],[14.6648355, 121.0361863],[14.6645797, 121.0362998],[14.6643204, 121.0364042],[14.6640578, 121.0364994],[14.6637921, 121.0365852],[14.6635238, 121.0366616],[14.6632518, 121.0367288],[14.6629778, 121.0367864],[14.6627020, 121.0368341],[14.6624248, 121.0368721],[14.6621464, 121.0369002],[14.6618674, 121.0369184],[14.6615878, 121.0369266],[14.6613082, 121.0369250],[14.6610288, 121.0369135],[14.6607499, 121.0368920],[14.6604719, 121.0368607],[14.6601951, 121.0368195],[14.6599199, 121.0367685],[14.6596464, 121.0367078],[14.6585556, 121.0364674],[14.6576436, 121.0362238],[14.6567184, 121.0360249],[14.6540123, 121.0353533],[14.6536795, 121.0352642],[14.6533482, 121.0351709],[14.6530184, 121.0350737],[14.6526899, 121.0349724],[14.6507671, 121.0343462],[14.6506419, 121.0343121],[14.6505144, 121.0342858],[14.6503856, 121.0342677],[14.6502560, 121.0342578],[14.6501260, 121.0342561],[14.6499962, 121.0342627],[14.6498669, 121.0342775],[14.6497314, 121.0343021],[14.6495976, 121.0343358],[14.6494662, 121.0343784],[14.6493377, 121.0344297],[14.6492128, 121.0344896],[14.6490919, 121.0345577],[14.6489755, 121.0346339],[14.6488628, 121.0347187],[14.6486645, 121.0349083],[14.6484649, 121.0350887],[14.6482604, 121.0352632],[14.6480545, 121.0354291],[14.6478443, 121.0355890],[14.6476300, 121.0357427],[14.6458603, 121.0368966],[14.6449474, 121.0374767],[14.6407706, 121.0401848],[14.6405375, 121.0403484],[14.6403080, 121.0405154],[14.6400812, 121.0406863],[14.6398600, 121.0408588],[14.6396414, 121.0410351],[14.6394566, 121.0411915],[14.6392844, 121.0413613],[14.6391523, 121.0415123],[14.6390278, 121.0416690],[14.6389107, 121.0418317],[14.6388013, 121.0420000],[14.6386980, 121.0421769],[14.6386031, 121.0423589],[14.6385169, 121.0425454],[14.6384397, 121.0427360],[14.6383710, 121.0429317],[14.6383164, 121.0431421],[14.6372771, 121.0480159],[14.6368907, 121.0496845],[14.6365031, 121.0513527],[14.6356138, 121.0551942],[14.6355706, 121.0553670],[14.6355203, 121.0555368],[14.6354627, 121.0557041],[14.6353980, 121.0558686],[14.6353263, 121.0560299],[14.6352477, 121.0561878],[14.6351623, 121.0563419],[14.6350681, 121.0564956],[14.6349672, 121.0566447],[14.6348598, 121.0567889],[14.6347462, 121.0569279],[14.6346266, 121.0570614],[14.6345012, 121.0571891],[14.6343692, 121.0573117],[14.6275904, 121.0635618],[14.6266533, 121.0644298],[14.6248881, 121.0660440],[14.6247322, 121.0661555],[14.6245699, 121.0662623],[14.6244037, 121.0663624],[14.6242339, 121.0664559],[14.6240607, 121.0665424],[14.6238822, 121.0666229],[14.6237007, 121.0666961],[14.6235166, 121.0667618],[14.6233302, 121.0668200],[14.6231409, 121.0668709],[14.6129478, 121.0694444],[14.6109278, 121.0699544],[14.6100511, 121.0703339],[14.6090033, 121.0705283],[14.6080787, 121.0705603],[14.6053673, 121.0702043],[14.6049795, 121.0701433],[14.6046034, 121.0700153],[14.6023069, 121.0691075],[14.6019129, 121.0690363],[14.6013762, 121.0690846],[14.6007581, 121.0692268],[14.5981863, 121.0697889],[14.5971469, 121.0698662],[14.5960868, 121.0697934],[14.5950786, 121.0695166],[14.5942366, 121.0690683],[14.5907620, 121.0649927],[14.5902690, 121.0646434],[14.5891320, 121.0642590],[14.5881503, 121.0641339],[14.5853472, 121.0641080],[14.5839512, 121.0640951],[14.5836464, 121.0640480],[14.5829419, 121.0638409],[14.5825801, 121.0637832],[14.5782556, 121.0636644],[14.5780621, 121.0636336],[14.5778934, 121.0635799],[14.5777299, 121.0635021],[14.5775715, 121.0633868],[14.5762711, 121.0622495],[14.5749003, 121.0610506],[14.5743916, 121.0606134],[14.5740820, 121.0603794],[14.5734854, 121.0601401],[14.5725587, 121.0600825],[14.5712880, 121.0602039],[14.5708802, 121.0601982],[14.5704423, 121.0601052],[14.5699367, 121.0599325],[14.5607154, 121.0566070],[14.5602301, 121.0564635],[14.5584651, 121.0558132],[14.5581986, 121.0557309],[14.5579934, 121.0556675],[14.5567095, 121.0552709],[14.5553234, 121.0548314],[14.5548139, 121.0547635],[14.5542707, 121.0547582],[14.5536898, 121.0548793],[14.5532301, 121.0551341],[14.5526072, 121.0554503],[14.5523378, 121.0555411],[14.5520571, 121.0555717],[14.5517696, 121.0555139],[14.5514217, 121.0553833],[14.5509682, 121.0552273],[14.5507938, 121.0551721],[14.5494477, 121.0545952],[14.5493988, 121.0546964],[14.5477166, 121.0541627],[14.5471507, 121.0539111],[14.5465624, 121.0535505],[14.5462307, 121.0531725],[14.5459440, 121.0527453],[14.5458271, 121.0524182],[14.5457567, 121.0521099],[14.5457208, 121.0518198],[14.5456836, 121.0514712],[14.5456392, 121.0511560],[14.5455531, 121.0507749],[14.5454180, 121.0502944],[14.5452299, 121.0498247],[14.5450083, 121.0494308],[14.5447423, 121.0490494],[14.5444193, 121.0486597],[14.5441406, 121.0483755],[14.5438680, 121.0481379],[14.5435886, 121.0479568],[14.5433308, 121.0478078],[14.5430558, 121.0477084],[14.5425298, 121.0475403],[14.5417056, 121.0472993],[14.5407120, 121.0468463],[14.5399482, 121.0462564],[14.5386969, 121.0446971],[14.5380745, 121.0434848],[14.5366417, 121.0401852],[14.5361709, 121.0391010],[14.5345200, 121.0353380],[14.5334526, 121.0330971],[14.5293530, 121.0246238],[14.5287886, 121.0234944],
-      // Direct mainline connection skipping cross-bar nodes:
+      [14.7093792, 121.0136209],[14.7083534, 121.0137702],[14.7062270, 121.0140797],[14.7060278, 121.0141146],[14.7058300, 121.0141584],[14.7056367, 121.0142104],[14.7054459, 121.0142707],[14.7032617, 121.0150295],[14.7006146, 121.0163034],[14.7004750, 121.0163723],[14.7003509, 121.0164380],[14.7002147, 121.0165106],[14.7000741, 121.0165888],[14.6999362, 121.0166724],[14.6998014, 121.0167612],[14.6996701, 121.0168548],[14.6995423, 121.0169534],[14.6994181, 121.0170568],[14.6992978, 121.0171647],[14.6927146, 121.0232849],[14.6926330, 121.0233614],[14.6925568, 121.0234449],[14.6924872, 121.0235343],[14.6924213, 121.0236271],[14.6923648, 121.0237273],[14.6923124, 121.0238268],[14.6922648, 121.0239390],[14.6922335, 121.0240476],[14.6922095, 121.0241628],[14.6921931, 121.0242681],[14.6921318, 121.0247878],[14.6921151, 121.0249265],[14.6920912, 121.0250640],[14.6920602, 121.0251999],[14.6920221, 121.0253340],[14.6919772, 121.0254657],[14.6919255, 121.0255948],[14.6918663, 121.0257224],[14.6918005, 121.0258465],[14.6917283, 121.0259667],[14.6916499, 121.0260827],[14.6915655, 121.0261941],[14.6914754, 121.0263006],[14.6908172, 121.0269393],[14.6904768, 121.0272843],[14.6901124, 121.0276778],[14.6893391, 121.0285306],[14.6887503, 121.0293469],[14.6886869, 121.0292853],[14.6886325, 121.0293099],[14.6883607, 121.0296189],[14.6880528, 121.0299393],[14.6877255, 121.0302724],[14.6874766, 121.0305057],[14.6872196, 121.0307465],[14.6869557, 121.0309759],[14.6867780, 121.0310856],[14.6865935, 121.0312129],[14.6864052, 121.0313188],[14.6862126, 121.0314160],[14.6860160, 121.0315043],[14.6860160, 121.0315043],[14.6856759, 121.0316407],[14.6854993, 121.0317051],[14.6853215, 121.0317532],[14.6851375, 121.0317889],[14.6849566, 121.0318129],[14.6837301, 121.0318934],[14.6796584, 121.0320072],[14.6771567, 121.0320722],[14.6764103, 121.0320851],[14.6747101, 121.0321300],[14.6730122, 121.0321749],[14.6711927, 121.0322202],[14.6709763, 121.0322496],[14.6707612, 121.0322885],[14.6705480, 121.0323366],[14.6703368, 121.0323940],[14.6701282, 121.0324606],[14.6699225, 121.0325361],[14.6697201, 121.0326206],[14.6695269, 121.0327110],[14.6693375, 121.0328096],[14.6691521, 121.0329160],[14.6689711, 121.0330302],[14.6687948, 121.0331520],[14.6686234, 121.0332812],[14.6684573, 121.0334174],[14.6669275, 121.0347807],[14.6667170, 121.0349689],[14.6665004, 121.0351495],[14.6662779, 121.0353224],[14.6660499, 121.0354873],[14.6658165, 121.0356441],[14.6655781, 121.0357926],[14.6653350, 121.0359325],[14.6650873, 121.0360638],[14.6648355, 121.0361863],[14.6645797, 121.0362998],[14.6643204, 121.0364042],[14.6640578, 121.0364994],[14.6637921, 121.0365852],[14.6635238, 121.0366616],[14.6632518, 121.0367288],[14.6629778, 121.0367864],[14.6627020, 121.0368341],[14.6624248, 121.0368721],[14.6621464, 121.0369002],[14.6618674, 121.0369184],[14.6615878, 121.0369266],[14.6613082, 121.0369250],[14.6610288, 121.0369135],[14.6607499, 121.0368920],[14.6604719, 121.0368607],[14.6601951, 121.0368195],[14.6599199, 121.0367685],[14.6596464, 121.0367078],[14.6585556, 121.0364674],[14.6576436, 121.0362238],[14.6567184, 121.0360249],[14.6540123, 121.0353533],[14.6536795, 121.0352642],[14.6533482, 121.0351709],[14.6530184, 121.0350737],[14.6526899, 121.0349724],[14.6507671, 121.0343462],[14.6506419, 121.0343121],[14.6505144, 121.0342858],[14.6503856, 121.0342677],[14.6502560, 121.0342578],[14.6501260, 121.0342561],[14.6499962, 121.0342627],[14.6498669, 121.0342775],[14.6497314, 121.0343021],[14.6495976, 121.0343358],[14.6494662, 121.0343784],[14.6493377, 121.0344297],[14.6492128, 121.0344896],[14.6490919, 121.0345577],[14.6489755, 121.0346339],[14.6488628, 121.0347187],[14.6486645, 121.0349083],[14.6484649, 121.0350887],[14.6482604, 121.0352632],[14.6480545, 121.0354291],[14.6478443, 121.0355890],[14.6476300, 121.0357427],[14.6458603, 121.0368966],[14.6449474, 121.0374767],[14.6407706, 121.0401848],[14.6405375, 121.0403484],[14.6403080, 121.0405154],[14.6400812, 121.0406863],[14.6398600, 121.0408588],[14.6396414, 121.0410351],[14.6394566, 121.0411915],[14.6392844, 121.0413613],[14.6391523, 121.0415123],[14.6390278, 121.0416690],[14.6389107, 121.0418317],[14.6388013, 121.0420000],[14.6386980, 121.0421769],[14.6386031, 121.0423589],[14.6385169, 121.0425454],[14.6384397, 121.0427360],[14.6383710, 121.0429317],[14.6383164, 121.0431421],[14.6372771, 121.0480159],[14.6368907, 121.0496845],[14.6365031, 121.0513527],[14.6356138, 121.0551942],[14.6355706, 121.0553670],[14.6355203, 121.0555368],[14.6354627, 121.0557041],[14.6353980, 121.0558686],[14.6353263, 121.0560299],[14.6352477, 121.0561878],[14.6351623, 121.0563419],[14.6350681, 121.0564956],[14.6349672, 121.0566447],[14.6348598, 121.0567889],[14.6347462, 121.0569279],[14.6346266, 121.0570614],[14.6345012, 121.0571891],[14.6343692, 121.0573117],[14.6275904, 121.0635618],[14.6266533, 121.0644298],[14.6248881, 121.0660440],[14.6247322, 121.0661555],[14.6245699, 121.0662623],[14.6244037, 121.0663624],[14.6242339, 121.0664559],[14.6240607, 121.0665424],[14.6238822, 121.0666229],[14.6237007, 121.0666961],[14.6235166, 121.0667618],[14.6233302, 121.0668200],[14.6231409, 121.0668709],[14.6129478, 121.0694444],[14.6109278, 121.0699544],[14.6100511, 121.0703339],[14.6090033, 121.0705283],[14.6080787, 121.0705603],[14.6053673, 121.0702043],[14.6049795, 121.0701433],[14.6046034, 121.0700153],[14.6023069, 121.0691075],[14.6019129, 121.0690363],[14.6013762, 121.0690846],[14.6007581, 121.0692268],[14.5981863, 121.0697889],[14.5971469, 121.0698662],[14.5960868, 121.0697934],[14.5950786, 121.0695166],[14.5942366, 121.0690683],[14.5907620, 121.0649927],[14.5902690, 121.0646434],[14.5891320, 121.0642590],[14.5881503, 121.0641339],[14.5853472, 121.0641080],[14.5839512, 121.0640951],[14.5836464, 121.0640480],[14.5829419, 121.0638409],[14.5825801, 121.0637832],[14.5782556, 121.0636644],[14.5780621, 121.0636336],[14.5778934, 121.0635799],[14.5777299, 121.0635021],[14.5775715, 121.0633868],[14.5762711, 121.0622495],[14.5749003, 121.0610506],[14.5743916, 121.0606134],[14.5740820, 121.0603794],[14.5734854, 121.0601401],[14.5725587, 121.0600825],[14.5712880, 121.0602039],[14.5708802, 121.0601982],[14.5704423, 121.0601052],[14.5699367, 121.0599325],[14.5607154, 121.0566070],[14.5602301, 121.0564635],[14.5584651, 121.0558132],[14.5581986, 121.0557309],[14.5579934, 121.0556675],[14.5567095, 121.0552709],[14.5553234, 121.0548314],[14.5548139, 121.0547635],[14.5542707, 121.0547582],[14.5536898, 121.0548793],[14.5532301, 121.0551341],[14.5526072, 121.0554503],[14.5523378, 121.0555411],[14.5520571, 121.0555717],[14.5517696, 121.0555139],[14.5514217, 121.0553833],[14.5509682, 121.0552273],[14.5507938, 121.0551721],[14.5494477, 121.0545952],[14.5493988, 121.0546964],[14.5477166, 121.0541627],[14.5471507, 121.0539111],[14.5465624, 121.0535505],[14.5462307, 121.0531725],[14.5459440, 121.0527453],[14.5458271, 121.0524182],[14.5457567, 121.0521099],[14.5457208, 121.0518198],[14.5456836, 121.0514712],[14.5456392, 121.0511560],[14.5455531, 121.0507749],[14.5454180, 121.0502944],[14.5452299, 121.0498247],[14.5450083, 121.0494308],[14.5447423, 121.0490494],[14.5444193, 121.0486597],[14.5441406, 121.0483755],[14.5438680, 121.0481379],[14.5435886, 121.0479568],[14.5433308, 121.0478078],[14.5430558, 121.0477084],[14.5425298, 121.0475403],[14.5417056, 121.0472993],[14.5407120, 121.0468463],[14.5399482, 121.0462564],[14.5386969, 121.0446971],[14.5380745, 121.0434848],[14.5366417, 121.0401852],[14.5361709, 121.0391010],[14.5345200, 121.0353380],[14.5334526, 121.0330971],[14.5293530, 121.0246238],[14.5287886, 121.0234944],
       [14.5211224, 121.0241362],[14.5203963, 121.0249375],[14.5191351, 121.0262620],[14.5184362, 121.0269798],[14.5178202, 121.0275973],[14.5165694, 121.0288977],[14.5155989, 121.0298509],[14.5144069, 121.0310514],[14.5140468, 121.0313390],[14.5136894, 121.0315647],[14.5123486, 121.0322839],[14.5113629, 121.0328086],[14.5105700, 121.0332307],[14.5090548, 121.0340582],[14.5086029, 121.0342969],[14.5082641, 121.0344820],[14.5078915, 121.0346749],[14.5071250, 121.0350874],[14.5064018, 121.0355638],[14.5057104, 121.0358329],[14.5049247, 121.0362475],[14.5036351, 121.0369247],[14.5020452, 121.0377781],[14.5003778, 121.0386655],[14.4981406, 121.0398917],[14.4968711, 121.0405870],[14.4960582, 121.0411119],[14.4957512, 121.0413182],[14.4957348, 121.0412854],[14.4925624, 121.0430288],[14.4901696, 121.0443136],[14.4900062, 121.0444029],[14.4898506, 121.0444947],[14.4896958, 121.0445932],[14.4895406, 121.0446838],[14.4893796, 121.0447739],[14.4880346, 121.0454420],[14.4876237, 121.0457103],[14.4874641, 121.0457954],[14.4873194, 121.0458725],[14.4871448, 121.0459656],[14.4867236, 121.0461902],[14.4847502, 121.0472426]
     ];
 
-    // 3b. 100% Exact OpenStreetMap Way 1377215771 (Terminal spur ending strictly at Station 15)
+    // 100% Exact OSM Way 1377215771 Loop ending strictly at Node 12752311664 (Station 15)
     const naiaSpurPoints = [
-      [14.5284407, 121.0228062], // node 12752311642 (Branches from Senate-DepEd)
-      [14.5282058, 121.0220499], // node 12752311665
-      [14.5280794, 121.0211815], // node 12752311661
-      [14.5278050, 121.0147791], // node 12752311662
-      [14.5277485, 121.0143329], // node 12752311673
-      [14.5276659, 121.0138975], // node 12752311672
-      [14.5275934, 121.0135917], // node 12752311674
-      [14.5274430, 121.0132590], // node 12752311667
-      [14.5272338, 121.0129342], // node 12752311675
-      [14.5270194, 121.0126737], // node 12752311671
-      [14.5267485, 121.0124248], // node 12752311676
-      [14.5264464, 121.0122188], // node 12752311666
-      [14.5260128, 121.0120144], // node 12752311677
-      [14.5256051, 121.0118744], // node 12752311670
-      [14.5250137, 121.0117928], // node 12752311678
-      [14.5246351, 121.0117648], // node 12752311668
-      [14.5240573, 121.0118403], // node 12752311679
-      [14.5236126, 121.0119824], // node 12752311669
-      [14.5232479, 121.0121773], // node 12752311680
-      [14.5229458, 121.0123925], // node 12752311663
-      [14.5226980, 121.0126124], // node 12752311681
-      [14.5203730, 121.0150310]  // node 12752311664 (NAIA Terminal 3 Box - Strict terminus)
+      [14.5284407, 121.0228062],
+      [14.5282058, 121.0220499],
+      [14.5280794, 121.0211815],
+      [14.5278050, 121.0147791],
+      [14.5277485, 121.0143329],
+      [14.5276659, 121.0138975],
+      [14.5275934, 121.0135917],
+      [14.5274430, 121.0132590],
+      [14.5272338, 121.0129342],
+      [14.5270194, 121.0126737],
+      [14.5267485, 121.0124248],
+      [14.5264464, 121.0122188],
+      [14.5260128, 121.0120144],
+      [14.5256051, 121.0118744],
+      [14.5250137, 121.0117928],
+      [14.5246351, 121.0117648],
+      [14.5240573, 121.0118403],
+      [14.5236126, 121.0119824],
+      [14.5232479, 121.0121773],
+      [14.5229458, 121.0123925],
+      [14.5226980, 121.0126124],
+      [14.5203730, 121.0150310]
     ];
 
     const fullPolyline = L.polyline(mainlinePoints.concat(naiaSpurPoints), { color: 'transparent' }).addTo(map);
 
-    // 4. Ground-Truth Construction Layers
+    // 6. Progress Layers
     const segments = [
       {
-        name: "CP101: Valenzuela to North Avenue",
-        cp: "CP101",
-        status: "Completed (Holed)",
-        badgeBg: "rgba(16, 185, 129, 0.15)", badgeBorder: "rgba(16, 185, 129, 0.4)", badgeColor: "#10b981",
-        color: "#10b981",
-        pts: mainlinePoints.slice(0, 117),
-        contractor: "Shimizu-DMCI-Takenaka JV",
-        strata: "Guadalupe Tuff Formation",
-        depth: "28.0m subterranean",
+        name: "CP101: Valenzuela to North Avenue", cp: "CP101",
+        status: "Completed (Holed)", badgeBg: "rgba(16, 185, 129, 0.15)", badgeBorder: "rgba(16, 185, 129, 0.4)", badgeColor: "#10b981",
+        color: "#10b981", pts: mainlinePoints.slice(0, 117),
+        contractor: "Shimizu-DMCI-Takenaka JV", strata: "Guadalupe Tuff Formation", depth: "28.0m subterranean",
         trajectory: "Mindanao Avenue corridor from Ugong Depot, traversing Quirino Highway, Tandang Sora, and terminating into VMMC station box.",
         interchange: "North Avenue UGCS Grand Central / MRT-3 / MRT-7 / LRT-1",
         verification: "Twin tunnel bores fully excavated and holed."
       },
       {
-        name: "CP102: North Avenue to Quezon Avenue",
-        cp: "CP102",
-        status: "Southbound Bore Holed (Sept 2026)",
-        badgeBg: "rgba(16, 185, 129, 0.15)", badgeBorder: "rgba(16, 185, 129, 0.4)", badgeColor: "#10b981",
-        color: "#10b981",
-        pts: mainlinePoints.slice(116, 146),
-        contractor: "Nishimatsu-DMCI Joint Venture",
-        strata: "Dense Sandstone / Tuff",
-        depth: "25.4m subterranean",
+        name: "CP102: North Avenue to Quezon Avenue", cp: "CP102",
+        status: "Southbound Bore Holed (Sept 2026)", badgeBg: "rgba(16, 185, 129, 0.15)", badgeBorder: "rgba(16, 185, 129, 0.4)", badgeColor: "#10b981",
+        color: "#10b981", pts: mainlinePoints.slice(116, 146),
+        contractor: "Nishimatsu-DMCI Joint Venture", strata: "Dense Sandstone / Tuff", depth: "25.4m subterranean",
         trajectory: "1.13 km southbound tunnel drive passing under Vertis North into the Eton Centris D-wall boundary.",
         interchange: "Direct interchange with MRT-3 Quezon Avenue Station and EDSA Carousel",
         verification: "Southbound TBM breakthrough holed September 2026."
       },
       {
-        name: "CP102: Quezon Avenue to East Avenue",
-        cp: "CP102",
-        status: "Station Box Cut (No TBM Launched)",
-        badgeBg: "rgba(56, 189, 248, 0.15)", badgeBorder: "rgba(56, 189, 248, 0.4)", badgeColor: "#38bdf8",
-        color: "#38bdf8",
-        pts: mainlinePoints.slice(145, 164),
-        contractor: "Nishimatsu-DMCI Joint Venture",
-        strata: "Guadalupe Tuff",
-        depth: "22.8m excavation",
+        name: "CP102: Quezon Avenue to East Avenue", cp: "CP102",
+        status: "Station Box Cut (No TBM Launched)", badgeBg: "rgba(56, 189, 248, 0.15)", badgeBorder: "rgba(56, 189, 248, 0.4)", badgeColor: "#38bdf8",
+        color: "#38bdf8", pts: mainlinePoints.slice(145, 164),
+        contractor: "Nishimatsu-DMCI Joint Venture", strata: "Guadalupe Tuff", depth: "22.8m excavation",
         trajectory: "East Avenue corridor connecting Quezon Avenue box with Philippine Heart Center cut.",
         interchange: "Quezon City Hall / Philippine Heart Center / East Ave Medical Hub",
         verification: "Station diaphragm wall construction and open-cut excavation underway."
       },
       {
-        name: "CP102/103: East Avenue to Anonas",
-        cp: "CP102/103",
-        status: "Staged / Station Box Works",
-        badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
-        color: "#c084fc",
-        pts: mainlinePoints.slice(163, 181),
-        contractor: "Sumitomo Mitsui / Nishimatsu",
-        strata: "Dense Sandstone",
-        depth: "31.4m depth",
+        name: "CP102/103: East Avenue to Anonas", cp: "CP102/103",
+        status: "Staged / Station Box Works", badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
+        color: "#c084fc", pts: mainlinePoints.slice(163, 181),
+        contractor: "Sumitomo Mitsui / Nishimatsu", strata: "Dense Sandstone", depth: "31.4m depth",
         trajectory: "Subterranean alignment heading southeast towards Aurora Boulevard.",
         interchange: "LRT-2 Anonas Station transfer concourse",
         verification: "Station reception pit and utility diversion works."
       },
       {
-        name: "CP103: Anonas to Camp Aguinaldo",
-        cp: "CP103",
-        status: "Actively Boring (~84% Completed)",
-        badgeBg: "rgba(245, 158, 11, 0.15)", badgeBorder: "rgba(245, 158, 11, 0.4)", badgeColor: "#f59e0b",
-        color: "#f59e0b",
-        pts: mainlinePoints.slice(180, 193),
-        contractor: "Sumitomo Mitsui Construction Co.",
-        strata: "Guadalupe Tuff Formation",
-        depth: "28.5m subterranean",
+        name: "CP103: Anonas to Camp Aguinaldo", cp: "CP103",
+        status: "Actively Boring (~84% Completed)", badgeBg: "rgba(245, 158, 11, 0.15)", badgeBorder: "rgba(245, 158, 11, 0.4)", badgeColor: "#f59e0b",
+        color: "#f59e0b", pts: mainlinePoints.slice(180, 193),
+        contractor: "Sumitomo Mitsui Construction Co.", strata: "Guadalupe Tuff Formation", depth: "28.5m subterranean",
         trajectory: "TBM #2 advancing north under Katipunan Ave toward Aurora Blvd / LRT-2 box reception headwall.",
         interchange: "LRT-2 Anonas Station concourse",
         verification: "Active EPB shield driving north (~83.9% completed)."
       },
       {
-        name: "CP103: Camp Aguinaldo to Ortigas Headwall",
-        cp: "CP103",
-        status: "Actively Boring (~64% Completed)",
-        badgeBg: "rgba(245, 158, 11, 0.15)", badgeBorder: "rgba(245, 158, 11, 0.4)", badgeColor: "#f59e0b",
-        color: "#f59e0b",
-        pts: mainlinePoints.slice(192, 214),
-        contractor: "Sumitomo Mitsui Construction Co.",
-        strata: "Guadalupe Tuff Formation",
-        depth: "34.0m subterranean",
+        name: "CP103: Camp Aguinaldo to Ortigas Headwall", cp: "CP103",
+        status: "Actively Boring (~64% Completed)", badgeBg: "rgba(245, 158, 11, 0.15)", badgeBorder: "rgba(245, 158, 11, 0.4)", badgeColor: "#f59e0b",
+        color: "#f59e0b", pts: mainlinePoints.slice(192, 214),
+        contractor: "Sumitomo Mitsui Construction Co.", strata: "Guadalupe Tuff Formation", depth: "34.0m subterranean",
         trajectory: "TBM #1 operating deep below White Plains and Greenmeadows toward Meralco Avenue station reception pit.",
         interchange: "Camp Aguinaldo / C-5 corridor",
         verification: "Active EPB shield boring south (~64.1% completed)."
       },
       {
-        name: "CP104: Ortigas to Shaw Boulevard",
-        cp: "CP104",
-        status: "Station Box Cut / Meralco Ave Pit",
-        badgeBg: "rgba(56, 189, 248, 0.15)", badgeBorder: "rgba(56, 189, 248, 0.4)", badgeColor: "#38bdf8",
-        color: "#38bdf8",
-        pts: mainlinePoints.slice(213, 225),
-        contractor: "Tokyu-Tobishima-Megawide JV",
-        strata: "Guadalupe Tuff Formation",
-        depth: "24.0m cut pit",
+        name: "CP104: Ortigas to Shaw Boulevard", cp: "CP104",
+        status: "Station Box Cut / Meralco Ave Pit", badgeBg: "rgba(56, 189, 248, 0.15)", badgeBorder: "rgba(56, 189, 248, 0.4)", badgeColor: "#38bdf8",
+        color: "#38bdf8", pts: mainlinePoints.slice(213, 225),
+        contractor: "Tokyu-Tobishima-Megawide JV", strata: "Guadalupe Tuff Formation", depth: "24.0m cut pit",
         trajectory: "Meralco Avenue retrieval pit and Shaw Boulevard diaphragm walling past Capitol Commons.",
         interchange: "Future MRT-4 / Ortigas CBD / Metrowalk",
         verification: "Meralco Ave deep shaft excavation and retrieval headwall."
       },
       {
-        name: "CP105-CP108: Shaw Blvd to BGC & Bicutan",
-        cp: "CP105-CP108",
-        status: "Staged / Civil Prep",
-        badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
-        color: "#c084fc",
-        pts: mainlinePoints.slice(224),
-        contractor: "Megawide JV / DOTr Interoperability",
-        strata: "Guadalupe Tuff & Silts",
-        depth: "Variable (Tunnel + Viaduct)",
+        name: "CP105-CP108: Shaw Blvd to BGC & Bicutan", cp: "CP105-CP108",
+        status: "Staged / Civil Prep", badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
+        color: "#c084fc", pts: mainlinePoints.slice(224),
+        contractor: "Megawide JV / DOTr Interoperability", strata: "Guadalupe Tuff & Silts", depth: "Variable (Tunnel + Viaduct)",
         trajectory: "Mainline route traversing 11th Ave BGC, Lawton Avenue, New Senate Building, Arca South (FTI), and NSCR Bicutan terminus.",
         interchange: "BGC Bus / New Senate / NSCR FTI & Bicutan Interchanges",
         verification: "Utility diversion, road easement clearing, and joint NSCR civil works."
       },
       {
-        name: "CP107: Senate-DepEd to NAIA Terminal 3 Spur",
-        cp: "CP107",
-        status: "Staged / Civil Prep",
-        badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
-        color: "#c084fc",
-        pts: naiaSpurPoints,
-        contractor: "CP107 Airport Spur Package",
-        strata: "Alluvium & Guadalupe Tuff",
-        depth: "21.5m subterranean",
+        name: "CP107: Senate-DepEd to NAIA Terminal 3 Spur", cp: "CP107",
+        status: "Airport Spur Terminus", badgeBg: "rgba(192, 132, 252, 0.15)", badgeBorder: "rgba(192, 132, 252, 0.4)", badgeColor: "#c084fc",
+        color: "#c084fc", pts: naiaSpurPoints,
+        contractor: "CP107 Airport Spur Package", strata: "Alluvium & Guadalupe Tuff", depth: "21.5m subterranean",
         trajectory: "Branches off Senate-DepEd westward, loops counter-clockwise around Andrews Avenue, and terminates at NAIA Terminal 3.",
         interchange: "Direct underground connection to NAIA Terminal 3 Departures & Arrivals",
         verification: "Dedicated airport spur package (OSM Way 1377215771)."
@@ -1215,7 +1052,6 @@
         opacity: 0.95
       }).addTo(map);
 
-      // Hit area for mobile
       const touchPoly = L.polyline(seg.pts, {
         color: 'transparent',
         weight: 26,
@@ -1223,11 +1059,13 @@
       }).addTo(map);
 
       touchPoly.on('click', () => {
+        const midIdx = Math.floor(seg.pts.length / 2);
+        focusFeature(seg.pts[midIdx][0], seg.pts[midIdx][1]);
         openInspector(seg.name, seg.cp, seg.status, seg.badgeBg, seg.badgeBorder, seg.badgeColor, seg.depth, seg.strata, seg.contractor, seg.trajectory, seg.interchange, seg.verification);
       });
     });
 
-    // 5. Render Station Markers & Direct Clickable Badges (Numbers + Names)
+    // 7. Render Station Markers & Numbered Badges
     stations.forEach((st, idx) => {
       const circle = L.circleMarker([st.lat, st.lng], {
         radius: 6.5,
@@ -1256,6 +1094,7 @@
       });
 
       const handleStationClick = () => {
+        focusFeature(st.lat, st.lng, 15.5);
         openInspector(`${st.num}. ${st.name} (${st.code})`, st.cp, st.status, st.badgeBg, st.badgeBorder, st.badgeColor, st.depth, st.strata, st.contractor, st.trajectory, st.interchange, st.verification);
       };
 
@@ -1271,7 +1110,7 @@
       });
     });
 
-    // 6. Active TBM Animated Markers
+    // 8. Active TBM Animated Markers
     const tbmCutterSvg = `<svg class="cutter-svg" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"></path></svg>`;
     const tbmIcon = L.divIcon({
       className: 'tbm-div-icon',
@@ -1282,15 +1121,17 @@
 
     // TBM 2: North Drive (Katipunan -> Anonas)
     L.marker([14.6231, 121.0668], { icon: tbmIcon }).addTo(map).on('click', () => {
+      focusFeature(14.6231, 121.0668, 16);
       openInspector("TBM #2 (SMCC North Drive)", "CP103", "ACTIVE BORING (~84%)", "rgba(245, 158, 11, 0.15)", "rgba(245, 158, 11, 0.4)", "#f59e0b", "28.5m depth", "Guadalupe Tuff Formation", "Sumitomo Mitsui Construction Co.", "Active Earth Pressure Balance (EPB) Shield advancing north beneath Katipunan Avenue approaching LRT-2 Anonas reception headwall.", "LRT-2 Anonas Station concourse", "Completed ~1,155m / 1,377m (~83.9%) total contract drive.");
     });
 
     // TBM 1: South Drive (White Plains -> Ortigas)
     L.marker([14.5942, 121.0690], { icon: tbmIcon }).addTo(map).on('click', () => {
+      focusFeature(14.5942, 121.0690, 16);
       openInspector("TBM #1 (SMCC South Drive)", "CP103", "ACTIVE BORING (~64%)", "rgba(245, 158, 11, 0.15)", "rgba(245, 158, 11, 0.4)", "#f59e0b", "34.0m depth", "Guadalupe Bedrock", "Sumitomo Mitsui Construction Co.", "Active EPB shield boring deep below White Plains and Greenmeadows (Quezon City/Pasig boundary) toward Ortigas Station Meralco Ave D-wall.", "Future MRT-4 / Ortigas CBD / Metrowalk", "Completed ~1,840m / 2,871m (~64.1%) total contract drive.");
     });
 
-    // 7. Inspector Function
+    // 9. Inspector Modal Actions
     const sheet = document.getElementById('inspector-sheet');
     function openInspector(title, cp, status, bg, border, color, depth, strata, contractor, trajectory, interchange, verification) {
       document.getElementById('insp-title').innerText = title;
@@ -1319,14 +1160,6 @@
     map.on('click', (e) => {
       if (e.originalEvent.target.id === 'map') {
         sheet.classList.remove('open');
-      }
-    });
-
-    // Default open on load (Ortigas)
-    window.addEventListener('load', () => {
-      const ortigas = stations.find(s => s.code === "BL09");
-      if (ortigas) {
-        openInspector(ortigas.num + ". " + ortigas.name + " (" + ortigas.code + ")", ortigas.cp, ortigas.status, ortigas.badgeBg, ortigas.badgeBorder, ortigas.badgeColor, ortigas.depth, ortigas.strata, ortigas.contractor, ortigas.trajectory, ortigas.interchange, ortigas.verification);
       }
     });
   </script>
